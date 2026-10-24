@@ -68,7 +68,9 @@ header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var
 .btn.danger.solid{background:var(--bad);border-color:var(--bad);color:#fff}
 .btn:disabled{opacity:.5;cursor:not-allowed}
 .link{border:0;background:none;color:var(--muted);font-size:.8rem;text-decoration:underline;padding:0}
-.dot{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:.85rem;color:#14213d;flex:none}
+.dot{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:.85rem;color:#14213d;flex:none;overflow:hidden}
+.dot img{width:100%;height:100%;object-fit:cover;display:block}
+.dot .e{font-size:1.45em;line-height:1}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:14px}
 .notice{background:var(--gold-soft);border:1px solid var(--gold);border-radius:10px;padding:10px 14px;font-weight:600;margin-bottom:14px}
 .eyebrow{font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:800;margin:0}
@@ -200,6 +202,46 @@ main{padding-block:24px 32px}
 .ttt button.win{border-color:var(--good);box-shadow:0 0 0 3px color-mix(in srgb,var(--good) 40%,transparent)}
 .gcard{position:relative}
 .gcard .badge{position:absolute;top:12px;right:12px}
+
+/* groups */
+.plus-btn.alt{margin-left:0;background:var(--surface);color:var(--ink);border:1.5px solid var(--line)}
+.plus-btn.alt span{background:var(--surface-2)}
+.grp-ic{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--gold);color:var(--gold-ink);flex:none}
+.grp-ic svg{width:16px;height:16px}
+.dm-bar .grp-ic{width:36px;height:36px}
+.pick input[type=checkbox]{width:18px;height:18px;accent-color:var(--good);flex:none}
+.pick.on{border-color:var(--gold);background:var(--gold-soft)}
+
+/* avatar picker */
+.emoji-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.emoji-grid button{aspect-ratio:1;border:1.5px solid var(--line);border-radius:12px;background:var(--surface-2);font-size:1.6rem;line-height:1;padding:0}
+.emoji-grid button[aria-pressed="true"]{border-color:var(--ink);background:var(--gold-soft)}
+.av-tabs{display:flex;gap:6px;flex-wrap:wrap}
+.av-tabs button{border:1.5px solid var(--line);background:var(--surface-2);border-radius:999px;padding:5px 12px;font-weight:800;font-size:.85rem}
+.av-tabs button[aria-pressed="true"]{background:var(--band);color:var(--band-ink);border-color:var(--band)}
+.av-prev{display:flex;align-items:center;gap:12px}
+.av-prev .dot{width:72px;height:72px;font-size:1.6rem}
+
+/* draw and guess */
+.dg-wrap{display:flex;flex-direction:column;gap:14px;max-width:760px}
+.dg-card{padding:16px;display:flex;flex-direction:column;gap:10px}
+.dg-card img{width:100%;max-width:360px;aspect-ratio:1;border-radius:12px;border:1px solid var(--line);background:#fff;align-self:center}
+.dg-card .meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:.82rem;color:var(--muted)}
+.dg-hint{font-family:var(--font-mono);font-size:1.15rem;letter-spacing:.3em;text-align:center;font-weight:700}
+.dg-guess{display:flex;gap:8px}
+.dg-guess input{flex:1;min-width:0;border:1.5px solid var(--line);border-radius:8px;padding:9px 12px;background:var(--surface-2);font-weight:600;color:var(--ink)}
+.dg-wrong{display:flex;gap:6px;flex-wrap:wrap}
+.dg-wrong span{text-decoration:line-through;color:var(--muted);font-size:.85rem;border:1px solid var(--line);border-radius:999px;padding:0 8px}
+.dg-ok{font-weight:800;color:var(--good)}
+.dg-pad{display:flex;flex-direction:column;align-items:center;gap:12px;padding:18px}
+.dg-pad canvas{max-width:360px;border:1px solid var(--line);background:#fff;cursor:crosshair}
+.dg-tools{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;align-items:center}
+.dg-tools .sw{width:30px;height:30px;border-radius:50%;border:2px solid var(--line);padding:0}
+.dg-tools .sw[aria-pressed="true"]{box-shadow:0 0 0 2px var(--surface),0 0 0 4px var(--ink)}
+.dg-tools .sz{border:1.5px solid var(--line);background:var(--surface-2);border-radius:999px;padding:4px 10px;font-weight:800;font-size:.8rem}
+.dg-tools .sz[aria-pressed="true"]{background:var(--band);color:var(--band-ink);border-color:var(--band)}
+.dg-word{font-family:var(--font-display);font-size:1.3rem;font-weight:700;text-align:center;margin:0}
+.dg-words{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
 
 /* chat attachments */
 .attach-btn{width:44px;height:44px;flex:none;border-radius:50%;border:1.5px solid var(--line);background:var(--surface-2);display:grid;place-items:center;color:var(--ink);padding:0}
@@ -573,7 +615,7 @@ canvas{width:100%;height:auto;border-radius:10px;touch-action:none;display:block
 
   <!-- CHAT -->
   <section id="view-chat" hidden>
-    <div class="view-head"><button class="back" data-open="home">← Home</button><h1 id="chatTitle">Year chat</h1><button class="plus-btn" id="dmNew" type="button" aria-label="Start a private chat"><span aria-hidden="true">+</span>Private chat</button><p id="chatSub">One room for the whole year. Be kind. Messages are limited to 300 characters.</p></div>
+    <div class="view-head"><button class="back" data-open="home">← Home</button><h1 id="chatTitle">Year chat</h1><button class="plus-btn" id="dmNew" type="button" aria-label="Start a private chat"><span aria-hidden="true">+</span>Private chat</button><button class="plus-btn alt" id="grpNew" type="button" aria-label="Start a group chat"><span aria-hidden="true">+</span>Group</button><p id="chatSub">One room for the whole year. Be kind. Messages are limited to 300 characters.</p></div>
     <div class="notice" id="chatNotice" hidden></div>
     <div class="dm-requests" id="dmRequests"></div>
     <div class="convos" id="convos" role="tablist" aria-label="Your chats"></div>
@@ -712,6 +754,13 @@ canvas{width:100%;height:auto;border-radius:10px;touch-action:none;display:block
       </div>
       <p class="err" id="qmErr" hidden></p>
     </form>
+  </section>
+
+  <!-- DRAW AND GUESS -->
+  <section id="view-draw" hidden>
+    <div class="view-head"><button class="back" data-open="games">← Games</button><h1>Draw and guess</h1><p>Draw a secret word for everyone to guess, or guess other people's drawings. You get 3 guesses for each drawing. Guess right for a point. The artist gets a point for every person who guesses it.</p></div>
+    <div class="dg-wrap" id="dgList"></div>
+    <div class="card dg-pad" id="dgPad" hidden></div>
   </section>
 
   <!-- WORD GUESS -->
@@ -920,6 +969,7 @@ const ICONS = {
   g2048:'<rect x="3" y="3" width="8" height="8" rx="2" '+S2+'/><rect x="13" y="3" width="8" height="8" rx="2" '+S2+'/><rect x="3" y="13" width="8" height="8" rx="2" '+S2+'/><rect x="13" y="13" width="8" height="8" rx="2" fill="currentColor"/>',
   bricks:'<path d="M3 4h5v3H3zM10 4h5v3h-5zM17 4h4v3h-4zM6 9h5v3H6zM13 9h5v3h-5z" fill="currentColor"/><circle cx="14" cy="16" r="1.8" fill="currentColor"/><path d="M6 20h8" '+S2+' stroke-width="2.4" stroke-linecap="round"/>',
   memory:'<rect x="3" y="5" width="10" height="14" rx="2" '+S2+'/><rect x="11" y="3" width="10" height="14" rx="2" fill="currentColor" stroke="currentColor" stroke-width="2"/>',
+  draw:'<path d="M4 20l4-1 10.5-10.5a2.1 2.1 0 0 0-3-3L5 16z" '+S2+' stroke-linejoin="round"/><path d="M14 7l3 3" '+S2+'/>',
   word:'<rect x="2.5" y="8" width="5.5" height="8" rx="1.2" fill="currentColor"/><rect x="9.25" y="8" width="5.5" height="8" rx="1.2" '+S2+' stroke-width="1.6"/><rect x="16" y="8" width="5.5" height="8" rx="1.2" fill="currentColor" opacity=".55"/>',
   reaction:'<path d="M13 3 5 13h6l-1 8 8-10h-6z" '+S2+' stroke-linejoin="round"/>',
   versus:'<circle cx="7" cy="8" r="3" '+S2+'/><circle cx="17" cy="8" r="3" '+S2+'/><path d="M2 20c.5-3.5 2.5-5 5-5s4.5 1.5 5 5M12 20c.5-3.5 2.5-5 5-5s4.5 1.5 5 5" '+S2+' stroke-linecap="round"/>',
@@ -932,6 +982,7 @@ const GAMES=[
   {id:"hopper",name:"Sky Hopper",desc:"Tap to flap through the gaps.",lower:false,unit:""},
   {id:"g2048",name:"2048",desc:"Slide and merge the number tiles.",lower:false,unit:""},
   {id:"bricks",name:"Brick Breaker",desc:"Smash every brick with the ball.",lower:false,unit:""},
+  {id:"draw",name:"Draw and guess",desc:"Draw a secret word. Guess everyone else's.",lower:false,unit:" points"},
   {id:"word",name:"Word Guess",desc:"Guess the word of the day in 6 tries.",lower:false,unit:" solved"},
   {id:"memory",name:"Memory Match",desc:"Find all 8 pairs in the fewest moves.",lower:true,unit:" moves"},
   {id:"reaction",name:"Reaction Test",desc:"Tap the moment it turns green.",lower:true,unit:" ms"},
@@ -944,7 +995,7 @@ const VIEWS=["start","mypin","settings","admin","polls","birthdays","home","chat
 let db=null, user=null, room=null, assets=null, myId=sess.get("yg-student"), isOwner=false, canWrite=null, dbReady=false, admins=[];
 const isAdmin=id=>!!id&&admins.includes(id);
 const adminActive=()=>loggedIn&&isAdmin(myId)&&!!(profiles[myId]||{}).pinHash;
-let profiles={}, scores={}, peers=[], messages=[], announcement=null, muted=[], polls={}, pollVotes={}, countdowns={}, reactions={}, vsGames={};
+let profiles={}, scores={}, peers=[], messages=[], announcement=null, muted=[], polls={}, pollVotes={}, countdowns={}, reactions={}, vsGames={}, groups={}, drawings={}, dgGuesses={};
 const isMuted=id=>!!id&&muted.includes(id);
 let loggedIn=false, view="start";
 let pendingView=(()=>{const h=location.hash.slice(1);return VIEWS.includes(h)&&h!=="start"?h:null})();
@@ -952,7 +1003,13 @@ let pendingView=(()=>{const h=location.hash.slice(1);return VIEWS.includes(h)&&h
 /* ---------- helpers ---------- */
 function el(tag,cls,text){const e=document.createElement(tag);if(cls)e.className=cls;if(text!=null)e.textContent=text;return e}
 function nameInitials(n){const w=String(n||"").trim().split(/\s+/).filter(Boolean);if(!w.length)return"?";return (w.length>1?w[0][0]+w[w.length-1][0]:w[0][0]).toUpperCase()}
-function dotFor(p){const d=el("span","dot",nameInitials(p&&p.nick));d.style.background=(p&&p.colour)||"#cfd6e4";d.setAttribute("aria-hidden","true");return d}
+function dotFor(p){
+  const d=el("span","dot");d.style.background=(p&&p.colour)||"#cfd6e4";d.setAttribute("aria-hidden","true");
+  if(p&&p.avatar&&/^[0-9a-f]{32}$/.test(p.avatar)){const im=document.createElement("img");im.alt="";im.loading="lazy";im.src="/_blob/"+p.avatar;im.onerror=()=>{im.remove();d.textContent=nameInitials(p.nick)};d.append(im)}
+  else if(p&&p.emoji&&AV_EMOJI.includes(p.emoji))d.append(el("span","e",p.emoji));
+  else d.textContent=nameInitials(p&&p.nick);
+  return d}
+const AV_EMOJI=["😀","😎","🤓","🥳","😺","🐶","🦊","🐼","🐸","🐵","🦁","🐯","🐨","🐙","🦄","🐲","⚽","🏀","🎮","🎸","🎨","📚","🚀","🌈","🍕","🍩","🌟","🔥","⚡","🏆"];
 function nickOf(id){const p=profiles[id];return p&&p.nick?p.nick:"Someone"}
 let toastT;
 function toast(msg){document.querySelectorAll(".toast").forEach(t=>t.remove());const t=el("div","toast",msg);t.setAttribute("role","status");document.body.appendChild(t);clearTimeout(toastT);toastT=setTimeout(()=>t.remove(),3200)}
@@ -981,6 +1038,7 @@ function open(v){
   if(v==="mypin")renderPin();
   if(v==="settings")renderSettings();
   if(v==="polls")renderPolls();
+  if(v==="draw"){dgPadOpen=false;renderDraw()}
   if(v==="versus"){vsActive=null;renderVersus()}
   if(v==="birthdays")renderBirthdays(true);
   if(v==="admin"){$("adminSearch").value="";renderAdmin()}
@@ -1245,6 +1303,7 @@ function renderAdmin(){
       acts.append(mk(p.pinHash?"Set new PIN":"Set a PIN","small primary",()=>adminSetPin(id)));
       if(p.pinHash)acts.append(mk("Turn off PIN","small",()=>resetPin(id)));
       acts.append(mk("Edit name","small",()=>adminEdit(id)));
+      if(p.avatar||p.emoji)acts.append(mk("Remove picture","small",()=>adminRemovePic(id)));
       if(!isAdmin(id)){
         acts.append(mk(isMuted(id)?"Unmute":"Mute","small",()=>setMuted(id,!isMuted(id))));
         acts.append(mk("Remove","small danger",()=>confirmRemove(id)));
@@ -1532,7 +1591,7 @@ function renderSettings(){
   const pr=section("Your profile");
   const row=el("div","me-row");const who=el("div","who");who.append(el("b",null,p.nick),el("small",null,(p.pinHash?"Locked with a PIN":"No PIN set")+(p.joined?" · joined "+new Date(p.joined).toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"}):"")));
   row.append(dotFor(p),who);pr.append(row);
-  const pb=el("div","row");pb.style.justifyContent="flex-start";const pin=el("button","btn",p.pinHash?"Change PIN":"Set a PIN");pin.dataset.open="mypin";const bd=el("button","btn",p.birthday?"Birthday: "+fmtBday(p.birthday):"Add your birthday");bd.dataset.open="birthdays";pb.append(mk("Edit name and colour","",openEditProfile),pin,bd);pr.append(pb);
+  const pb=el("div","row");pb.style.justifyContent="flex-start";const pin=el("button","btn",p.pinHash?"Change PIN":"Set a PIN");pin.dataset.open="mypin";const bd=el("button","btn",p.birthday?"Birthday: "+fmtBday(p.birthday):"Add your birthday");bd.dataset.open="birthdays";pb.append(mk("Edit name and colour","",openEditProfile),mk("Change picture","",openAvatar),pin,bd);pr.append(pb);
 
   // appearance
   const ap=section("Appearance");const g=el("div","set-grid");
@@ -1594,7 +1653,7 @@ function confirmDeleteMe(){
       go.disabled=true;const id=myId;
       try{
         try{const hs=await db.doc("homework/"+id).collection("items").get();for(const d of hs.docs)await db.doc("homework/"+id).collection("items").doc(d.id).delete()}catch(e){}
-        for(const t of myThreads()){try{await db.doc("dms/"+t.id).delete()}catch(e){}}
+        for(const t of myThreads()){try{if(t.kind==="group")await leaveGroup(t,true);else await db.doc("dms/"+t.id).delete()}catch(e){}}
         for(const path of ["scores/"+id,"quizres/"+id,"wordstate/"+id,"dmread/"+id]){try{await db.doc(path).delete()}catch(e){}}
         await db.doc("profiles/"+id).delete();
         closeModal();switchAccount();toast("Account deleted");
@@ -1610,10 +1669,17 @@ $("renameBtn").onclick=()=>modal("Rename the site",m=>{
 });
 
 /* ---------- chat (year chat + private chats) ---------- */
-let dmsLoaded=false,dms={},dmMsgs=[],activeConv="year",dmMsgUnsub=null,dmMsgFor=null,dmRead={},dmReadUnsub=null,dmReadFor=null,dmSeen=null,dmLast={},dmFor=null;
+let groupsLoaded=false,dmsLoaded=false,dms={},dmMsgs=[],activeConv="year",dmMsgUnsub=null,dmMsgFor=null,dmRead={},dmReadUnsub=null,dmReadFor=null,dmSeen=null,dmLast={},dmFor=null;
 const pairId=(x,y)=>[x,y].sort().join("__");
 const otherOf=t=>t.a===myId?t.b:t.a;
-function myThreads(){if(!myId)return[];return Object.entries(dms).filter(([id,t])=>t&&(t.a===myId||t.b===myId)&&profiles[t.a===myId?t.b:t.a]).map(([id,t])=>Object.assign({id},t))}
+function myThreads(){if(!myId)return[];
+  const d=Object.entries(dms).filter(([id,t])=>t&&(t.a===myId||t.b===myId)&&profiles[t.a===myId?t.b:t.a]).map(([id,t])=>Object.assign({id},t));
+  const g=Object.entries(groups).filter(([id,x])=>x&&x.members&&x.members[myId]).map(([id,x])=>Object.assign({},x,{id,kind:"group",status:x.members[myId]==="in"?"accepted":"pending",to:x.members[myId]==="invited"?myId:null,from:(x.invitedBy&&x.invitedBy[myId])||x.owner}));
+  return d.concat(g)}
+const thRef=t=>db.doc((t.kind==="group"?"groups/":"dms/")+t.id);
+const grpIn=t=>Object.keys(t.members||{}).filter(id=>t.members[id]==="in"&&profiles[id]);
+const GRP_ICON='<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="9" r="3" fill="none" stroke="currentColor" stroke-width="2.4"/><circle cx="16" cy="9" r="3" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M2.5 19c.6-3 2.8-4.5 5.5-4.5s4.9 1.5 5.5 4.5M10.5 19c.6-3 2.8-4.5 5.5-4.5s4.9 1.5 5.5 4.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>';
+const grpIc=()=>{const s=el("span","grp-ic");s.innerHTML=GRP_ICON;return s};
 function curThread(){return activeConv==="year"?null:(myThreads().find(t=>t.id===activeConv)||null)}
 function isUnread(t){return t.status==="accepted"&&t.lastAt&&t.lastBy&&t.lastBy!==myId&&t.lastAt>(dmRead[t.id]||0)&&!(view==="chat"&&activeConv===t.id)}
 function incoming(){return myThreads().filter(t=>t.status==="pending"&&t.to===myId)}
@@ -1625,7 +1691,8 @@ function renderConvos(){
   const yr=el("span","yr");yr.innerHTML=YR_ICON;chip("year","Year chat",yr);
   const ts=myThreads().filter(t=>t.status==="accepted"||(t.status==="pending"&&t.from===myId)||(t.status==="declined"&&t.from===myId&&!(t.hiddenFor||[]).includes(myId)));
   ts.sort((x,y)=>(y.lastAt||y.created||0)-(x.lastAt||x.created||0));
-  ts.forEach(t=>{const o=otherOf(t);let extra=null,cls="";
+  ts.forEach(t=>{if(t.kind==="group"){chip(t.id,t.name||"Group",grpIc(),isUnread(t)?el("span","badge","new"):null,"");return}
+    const o=otherOf(t);let extra=null,cls="";
     if(t.status==="pending"){extra=el("small",null,"Waiting");cls="waiting"}
     else if(t.status==="declined"){extra=el("small",null,"Declined");cls="waiting"}
     else if(isUnread(t))extra=el("span","badge","new");
@@ -1633,8 +1700,9 @@ function renderConvos(){
 }
 function renderRequests(){
   const box=$("dmRequests");box.replaceChildren();if(!loggedIn)return;
-  incoming().forEach(t=>{const o=t.from;const r=el("div","dm-req");r.append(dotFor(profiles[o]));
-    const tx=el("div","tx",nickOf(o)+" wants to chat with you privately");tx.append(el("small",null,"Only accept if you know them. You can leave the chat at any time."));
+  incoming().forEach(t=>{const o=t.from;const r=el("div","dm-req");r.append(t.kind==="group"?grpIc():dotFor(profiles[o]));
+    const tx=el("div","tx",t.kind==="group"?nickOf(o)+" added you to the group \u201c"+(t.name||"Group")+"\u201d":nickOf(o)+" wants to chat with you privately");
+    tx.append(el("small",null,t.kind==="group"?"Members: "+grpIn(t).map(nickOf).join(", ")+". You can leave the group at any time.":"Only accept if you know them. You can leave the chat at any time."));
     const acc=mk("Accept","primary small",()=>respond(t,true)),dec=mk("Decline","small",()=>respond(t,false));
     r.append(tx,dec,acc);box.append(r)});
 }
@@ -1642,6 +1710,7 @@ function renderChatHead(){
   const t=curThread(),bar=$("dmBar");bar.replaceChildren();
   if(activeConv!=="year"&&!t){activeConv="year"}
   if(!t){$("chatTitle").textContent="Year chat";$("chatSub").textContent="One room for the whole year. Be kind. Messages are limited to 300 characters.";bar.hidden=true;setComposer(!isMuted(myId),isMuted(myId)?"An admin has muted you in the year chat":"Write a message…");return}
+  if(t.kind==="group"){renderGroupHead(t,bar);return}
   const o=otherOf(t),n=nickOf(o);
   $("chatTitle").textContent="Chat with "+n;
   $("chatSub").textContent="A private chat. Only you and "+n+" see it on this site.";
@@ -1662,7 +1731,7 @@ function setConv(id){
   const want=id==="year"?null:id;
   if(want!==dmMsgFor){if(dmMsgUnsub){dmMsgUnsub();dmMsgUnsub=null}dmMsgs=[];dmMsgFor=want;
     const t=curThread();
-    if(want&&db&&t&&t.status==="accepted")dmMsgUnsub=db.doc("dms/"+want).collection("msgs").orderBy("at","desc").limit(150).onSnapshot(sn=>{if(dmMsgFor!==want)return;dmMsgs=sn.docs.map(d=>Object.assign({id:d.id},d.data())).reverse();renderChat();markRead(want)},()=>{});
+    if(want&&db&&t&&t.status==="accepted")dmMsgUnsub=thRef(t).collection("msgs").orderBy("at","desc").limit(150).onSnapshot(sn=>{if(dmMsgFor!==want)return;dmMsgs=sn.docs.map(d=>Object.assign({id:d.id},d.data())).reverse();renderChat();markRead(want)},()=>{});
     else if(want)dmMsgFor=null;
   }
   $("msgs").dataset.init="";
@@ -1690,8 +1759,8 @@ function onDmsChange(quiet){
   if(dmSeen===null){if(!dmsLoaded){}else{dmSeen=new Set(mine.filter(t=>t.status==="pending"&&t.to===myId).map(t=>t.id));mine.forEach(t=>dmLast[t.id]=t.lastAt||0)}}
   else if(!quiet){
     mine.forEach(t=>{
-      if(t.status==="pending"&&t.to===myId&&!dmSeen.has(t.id)){dmSeen.add(t.id);toast(nickOf(t.from)+" wants to chat with you privately");if(prefs().sound)beep()}
-      if(t.status==="accepted"&&t.lastAt&&t.lastAt>(dmLast[t.id]||0)&&t.lastBy&&t.lastBy!==myId){if(prefs().sound)beep();if(!(view==="chat"&&activeConv===t.id))toast(nickOf(t.lastBy)+" sent you a private message")}
+      if(t.status==="pending"&&t.to===myId&&!dmSeen.has(t.id)){dmSeen.add(t.id);toast(t.kind==="group"?nickOf(t.from)+" added you to "+(t.name||"a group"):nickOf(t.from)+" wants to chat with you privately");if(prefs().sound)beep()}
+      if(t.status==="accepted"&&t.lastAt&&t.lastAt>(dmLast[t.id]||0)&&t.lastBy&&t.lastBy!==myId){if(prefs().sound)beep();if(!(view==="chat"&&activeConv===t.id))toast(t.kind==="group"?nickOf(t.lastBy)+" in "+(t.name||"your group"):nickOf(t.lastBy)+" sent you a private message")}
       dmLast[t.id]=t.lastAt||0;
     });
   }
@@ -1702,6 +1771,7 @@ function onDmsChange(quiet){
 }
 async function respond(t,yes){
   if(canWrite===false){toast("Your access is view-only");return}
+  if(t.kind==="group")return groupRespond(t,yes);
   try{
     if(yes){const now=Date.now();await db.doc("dms/"+t.id).update({status:"accepted",acceptedAt:now,lastAt:now,lastBy:"",lastText:""});dms[t.id]=Object.assign({},dms[t.id],{status:"accepted",acceptedAt:now,lastAt:now});toast("You can now chat with "+nickOf(t.from));dmMsgFor=undefined;setConv(t.id)}
     else{await db.doc("dms/"+t.id).update({status:"declined",declinedAt:Date.now()});toast("Request declined")}
@@ -1710,6 +1780,7 @@ async function respond(t,yes){
 async function cancelReq(t){try{await db.doc("dms/"+t.id).delete();toast("Request cancelled");setConv("year")}catch(e){toast("Couldn't cancel. Try again.")}}
 async function hideDeclined(t){try{await db.doc("dms/"+t.id).update({hiddenFor:[...new Set([...(t.hiddenFor||[]),myId])]});setConv("year")}catch(e){toast("Couldn't remove. Try again.")}}
 function confirmLeave(t){
+  if(t.kind==="group")return confirmLeaveGroup(t);
   const n=nickOf(otherOf(t));
   modal("Leave your chat with "+n+"?",m=>{m.append(el("p",null,"This deletes the chat and all its messages for both of you. You'd need to send a new request to chat again."));
     const go=mk("Leave chat","danger solid",async()=>{go.disabled=true;try{
@@ -1745,12 +1816,257 @@ function openNewDm(){
   });
 }
 $("dmNew").onclick=openNewDm;
+/* ---------- group chats ---------- */
+const GROUP_MAX=20;
+function renderGroupHead(t,bar){
+  const ins=grpIn(t),n=t.name||"Group";
+  $("chatTitle").textContent=n;$("chatSub").textContent="A group chat. Only the people in it see it on this site.";
+  bar.hidden=false;bar.append(grpIc());const tx=el("div","tx");
+  const inv=Object.keys(t.members||{}).filter(id=>t.members[id]==="invited"&&profiles[id]).length;
+  tx.append(el("b",null,n),el("small",null,ins.length+(ins.length===1?" member: ":" members: ")+ins.map(id=>id===myId?"you":nickOf(id)).join(", ")+(inv?" · "+inv+" invited":"")));
+  bar.append(tx,mk("Members","small",()=>openGroupMembers(t)),mk("Leave","small danger",()=>confirmLeaveGroup(t)));
+  setComposer(true,"Message "+n+"…");
+}
+function pickPeople(m,exclude,onDone,label){
+  const others=Object.keys(profiles).filter(id=>id!==myId&&!exclude.includes(id)).sort((x,y)=>nickOf(x).localeCompare(nickOf(y)));
+  const chosen=new Set();
+  if(!others.length){m.append(el("p","sub","There's no one else to add."));btnRow(m,mk("OK","primary",closeModal));return}
+  let search=null;if(others.length>6){const l=el("label",null,"Search");search=el("input");search.id="grpSearch";search.placeholder="Type a name";search.autocomplete="off";l.append(search);m.append(l)}
+  const list=el("div","pick-list");m.append(list);
+  const draw=()=>{list.replaceChildren();const q=search?search.value.trim().toLowerCase():"";
+    others.filter(o=>!q||nickOf(o).toLowerCase().includes(q)).forEach(o=>{const b=el("label","pick"+(chosen.has(o)?" on":""));const cb=el("input");cb.type="checkbox";cb.checked=chosen.has(o);
+      cb.onchange=()=>{if(cb.checked){if(chosen.size+exclude.length+1>GROUP_MAX){cb.checked=false;toast("Groups can have up to "+GROUP_MAX+" people");return}chosen.add(o)}else chosen.delete(o);b.classList.toggle("on",cb.checked)};
+      b.append(cb,dotFor(profiles[o]),el("span","nm",nickOf(o)));list.append(b)});
+    if(!list.children.length)list.append(el("p","sub","No one matches that name."))};
+  if(search)search.oninput=draw;draw();
+  const go=mk(label,"primary",()=>{if(!chosen.size){toast("Pick at least one person");return}onDone([...chosen],go)});
+  btnRow(m,mk("Cancel","",closeModal),go);
+}
+function openNewGroup(){
+  modal("Start a group chat",m=>{
+    if(!db||canWrite===false){writeBlocked(m);return}
+    const nl=el("label",null,"Group name");const ni=el("input");ni.id="grpName";ni.maxLength=30;ni.placeholder="e.g. Football team";ni.autocomplete="off";nl.append(ni);m.append(nl);
+    m.append(el("p","sub","Pick who to add. Each person gets an invite and joins once they accept."));m.lastChild.style.margin="0";
+    pickPeople(m,[],async(ids,go)=>{
+      const name=clean(ni.value.trim()).slice(0,30);if(name.length<2){toast("Give the group a name");ni.focus();return}
+      go.disabled=true;const members={[myId]:"in"},invitedBy={};ids.forEach(id=>{members[id]="invited";invitedBy[id]=myId});
+      const now=Date.now();const doc={name,owner:myId,members,invitedBy,created:now,lastAt:now,lastBy:"",lastText:""};
+      try{const ref=db.collection("groups").doc("grp"+Date.now().toString(36)+Math.random().toString(36).slice(2,8));await ref.set(doc);groups[ref.id]=doc;closeModal();dmMsgFor=undefined;setConv(ref.id);toast("Group made. People join when they accept.")}
+      catch(e){go.disabled=false;toast("Couldn't make the group. Try again.")}
+    },"Make group");
+  });
+}
+$("grpNew").onclick=openNewGroup;
+async function groupRespond(t,yes){
+  const g=groups[t.id];if(!g)return;
+  const members=Object.assign({},g.members);const invitedBy=Object.assign({},g.invitedBy||{});
+  if(yes)members[myId]="in";else{delete members[myId];delete invitedBy[myId]}
+  try{const next=Object.assign({},g,{members,invitedBy});await db.doc("groups/"+t.id).set(next);groups[t.id]=next;
+    if(yes){toast("You joined "+(g.name||"the group"));dmMsgFor=undefined;setConv(t.id)}else{toast("Invite declined");onDmsChange(true)}}
+  catch(e){toast("Couldn't do that. Try again.")}
+}
+async function leaveGroup(t,quiet){
+  const g=groups[t.id];if(!g)return;
+  const members=Object.assign({},g.members);delete members[myId];
+  const stillIn=Object.keys(members).filter(id=>members[id]==="in");
+  if(!stillIn.length){
+    try{const ms=await db.doc("groups/"+t.id).collection("msgs").get();for(const d of ms.docs){const v=d.data()||{};await db.doc("groups/"+t.id).collection("msgs").doc(d.id).delete();dropAtt(v)}}catch(e){}
+    await db.doc("groups/"+t.id).delete();delete groups[t.id];
+  }else{
+    const next=Object.assign({},g,{members,owner:g.owner===myId?stillIn[0]:g.owner});await db.doc("groups/"+t.id).set(next);groups[t.id]=next;
+  }
+  if(!quiet){setConv("year");toast("You left "+(g.name||"the group"))}
+}
+function confirmLeaveGroup(t){
+  const ins=grpIn(t).filter(id=>id!==myId);
+  modal("Leave "+(t.name||"this group")+"?",m=>{
+    m.append(el("p",null,ins.length?"You'll stop getting its messages. Someone in the group can add you back.":"You're the last one in it, so the group and its messages will be deleted."));
+    const go=mk("Leave group","danger solid",async()=>{go.disabled=true;try{await leaveGroup(t);closeModal()}catch(e){go.disabled=false;toast("Couldn't leave. Try again.")}});
+    btnRow(m,mk("Cancel","",closeModal),go)});
+}
+function openGroupMembers(t){
+  const g=groups[t.id];if(!g)return;const isOwner=g.owner===myId;
+  modal(g.name||"Group",m=>{
+    if(isOwner){const nl=el("label",null,"Group name");const ni=el("input");ni.id="grpRename";ni.maxLength=30;ni.value=g.name||"";nl.append(ni);m.append(nl);
+      ni.addEventListener("change",async()=>{const v=clean(ni.value.trim()).slice(0,30);if(v.length<2||v===g.name)return;try{const next=Object.assign({},groups[t.id],{name:v});await db.doc("groups/"+t.id).set(next);groups[t.id]=next;renderChatHead();renderConvos();toast("Group renamed")}catch(e){toast("Couldn't rename")}})}
+    const list=el("div","pick-list");m.append(list);
+    Object.keys(g.members).filter(id=>profiles[id]).sort((a,b)=>(g.members[a]==="in"?0:1)-(g.members[b]==="in"?0:1)||nickOf(a).localeCompare(nickOf(b))).forEach(id=>{
+      const r=el("div","pick");r.append(dotFor(profiles[id]),el("span","nm",(id===myId?"You":nickOf(id))+(id===g.owner?" · made the group":"")),el("small",null,g.members[id]==="in"?"":"Invited"));
+      if(isOwner&&id!==myId){const x=mk("Remove","small",async()=>{const members=Object.assign({},groups[t.id].members);delete members[id];try{const next=Object.assign({},groups[t.id],{members});await db.doc("groups/"+t.id).set(next);groups[t.id]=next;closeModal();renderChatHead();toast(nickOf(id)+" was removed")}catch(e){toast("Couldn't remove")}});r.append(x)}
+      list.append(r)});
+    const row=el("div","row");row.style.justifyContent="space-between";
+    row.append(mk("Add people","primary",()=>{closeModal();modal("Add people to "+(g.name||"the group"),m2=>{
+      pickPeople(m2,Object.keys(groups[t.id].members),async(ids,go)=>{go.disabled=true;const cur=groups[t.id];const members=Object.assign({},cur.members),invitedBy=Object.assign({},cur.invitedBy||{});
+        ids.forEach(id=>{members[id]="invited";invitedBy[id]=myId});
+        try{const next=Object.assign({},cur,{members,invitedBy});await db.doc("groups/"+t.id).set(next);groups[t.id]=next;closeModal();renderChatHead();toast("Invites sent")}catch(e){go.disabled=false;toast("Couldn't add them")}},"Send invites")})}),mk("Close","",closeModal));
+    m.append(row);
+  });
+}
+
+/* ---------- profile pictures ---------- */
+function squareJpeg(file,size){
+  return new Promise((res,rej)=>{const url=URL.createObjectURL(file);const im=new Image();
+    im.onload=()=>{const s=Math.min(im.width,im.height);const cv=document.createElement("canvas");cv.width=cv.height=size;const cx=cv.getContext("2d");cx.fillStyle="#fff";cx.fillRect(0,0,size,size);
+      cx.drawImage(im,(im.width-s)/2,(im.height-s)/2,s,s,0,0,size,size);URL.revokeObjectURL(url);cv.toBlob(b=>b?res(b):rej(),"image/jpeg",.85)};
+    im.onerror=()=>{URL.revokeObjectURL(url);rej()};im.src=url});
+}
+function openAvatar(){
+  const p=profiles[myId];if(!p)return;
+  modal("Profile picture",m=>{
+    if(!db||canWrite===false){writeBlocked(m);return}
+    let mode=p.avatar?"photo":p.emoji?"emoji":"initials",emoji=p.emoji||AV_EMOJI[0],photoBlob=null;
+    const prev=el("div","av-prev");let dot=dotFor(p);const prevTx=el("span","sub","This is how you'll look everywhere.");prevTx.style.margin="0";prev.append(dot,prevTx);
+    const redraw=()=>{const fake=Object.assign({},p);delete fake.avatar;delete fake.emoji;if(mode==="emoji")fake.emoji=emoji;
+      let d=dotFor(fake);if(mode==="photo"){if(photoBlob){d=el("span","dot");const im=document.createElement("img");im.src=URL.createObjectURL(photoBlob);im.alt="";d.append(im)}else if(p.avatar)d=dotFor(p)}
+      dot.replaceWith(d);dot=d;body()};
+    const tabs=el("div","av-tabs");[["photo","Photo"],["emoji","Emoji"],["initials","Initials"]].forEach(([k,l])=>{const b=el("button",null,l);b.type="button";b.dataset.k=k;b.onclick=()=>{mode=k;redraw()};tabs.append(b)});
+    const area=el("div");const err=el("p","err");err.hidden=true;
+    function body(){tabs.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.k===mode)));area.replaceChildren();
+      if(mode==="photo"){if(!assets){area.append(el("p","sub","Uploading photos isn't available on your account. Pick an emoji instead."));return}
+        const l=el("label",null,"Choose a photo");const fi=el("input");fi.type="file";fi.accept="image/png,image/jpeg,image/webp";fi.id="avFile";l.append(fi);area.append(l,el("p","sub","It'll be cropped to a square. Only use a photo you're happy for everyone in the year to see."));
+        fi.onchange=async()=>{const f=fi.files&&fi.files[0];if(!f)return;try{photoBlob=await squareJpeg(f,256);redraw()}catch(e){toast("Couldn't read that photo")}}}
+      else if(mode==="emoji"){const g=el("div","emoji-grid");AV_EMOJI.forEach(e=>{const b=el("button",null,e);b.type="button";b.setAttribute("aria-pressed",String(e===emoji));b.setAttribute("aria-label",e);b.onclick=()=>{emoji=e;redraw()};g.append(b)});area.append(g)}
+      else area.append(el("p","sub","Your initials on your colour. Change your colour in Edit name and colour."))}
+    m.append(prev,tabs,area,err);body();
+    const go=mk("Save","primary",async()=>{err.hidden=true;go.disabled=true;
+      try{
+        const next=Object.assign({},profiles[myId]);const oldAvatar=next.avatar;delete next.avatar;delete next.emoji;
+        if(mode==="photo"){if(photoBlob){const r=await assets.upload(new File([photoBlob],"profile.jpg",{type:"image/jpeg"}));next.avatar=r.id}else if(oldAvatar)next.avatar=oldAvatar;else{go.disabled=false;err.textContent="Choose a photo first.";err.hidden=false;return}}
+        else if(mode==="emoji")next.emoji=emoji;
+        await db.doc("profiles/"+myId).set(next);profiles[myId]=next;
+        if(oldAvatar&&oldAvatar!==next.avatar&&assets)assets.delete(oldAvatar).catch(()=>{});
+        closeModal();renderAccount();if(view==="settings")renderSettings();toast("Picture saved");
+      }catch(e){go.disabled=false;err.textContent=e&&e.code==="unsupported_type"?"That photo can't be used. Try a JPG or PNG.":"Couldn't save. Try again.";err.hidden=false}
+    });
+    btnRow(m,mk("Cancel","",closeModal),go);
+  });
+}
+async function adminRemovePic(uid){
+  if(!adminActive())return;const p=profiles[uid];if(!p)return;
+  const next=Object.assign({},p);const old=next.avatar;delete next.avatar;delete next.emoji;
+  try{await db.doc("profiles/"+uid).set(next);profiles[uid]=next;if(old&&assets)assets.delete(old).catch(()=>{});renderAdmin();toast("Picture removed")}catch(e){toast("Couldn't remove it")}
+}
+
+/* ---------- draw and guess ---------- */
+const DG_WORDS=["apple","banana","pizza","cake","rocket","house","tree","car","bicycle","dog","cat","fish","horse","snake","spider","butterfly","sun","moon","star","rainbow","cloud","umbrella","flower","boat","train","plane","guitar","drum","book","pencil","clock","phone","computer","robot","ghost","dragon","castle","crown","sword","shoe","hat","glasses","snowman","football","trophy","ice cream","burger","bridge","mountain","volcano","island","shark","whale","octopus","penguin","elephant","giraffe","lion","monkey","owl","bee","ladder","key","door","window","chair","bed","lamp","candle","balloon","kite","tent","camera","teapot","cup","fork","scissors","hammer","tooth","eye","hand","heart","sandwich","cheese","carrot","egg","turtle","frog","rabbit","mouse","bat","alien","bus","tractor","helicopter","skateboard","basketball","map","present","bell","envelope","sock","t-shirt","school","teacher","homework","beach","jellyfish","crab","cactus","mushroom","pumpkin","witch","pirate","treasure","anchor","lighthouse","igloo","firework"];
+const dgNorm=s=>String(s||"").toLowerCase().replace(/[^a-z]/g,"");
+async function dgHash(id,word){const t="dg|"+id+"|"+dgNorm(word);try{const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(t));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("")}catch(e){let h=2166136261;for(const c of t){h^=c.charCodeAt(0);h=Math.imul(h,16777619)>>>0}return"f"+h.toString(16)}}
+const dgHint=w=>w.split("").map(c=>/[a-z]/i.test(c)?"_":c===" "?" ":c).join(" ");
+let dgPadOpen=false,dgWord=null,dgChoices=[],dgStrokes=[],dgColour="#111111",dgSize=6,dgSending=false;
+const dgCredited=new Set();
+function dgMyGuess(id){return dgGuesses[id+"~"+myId]||null}
+function dgSolvers(id){return Object.values(dgGuesses).filter(g=>g&&g.d===id&&g.correct&&profiles[g.by]).map(g=>g.by)}
+function renderDraw(){
+  const list=$("dgList"),pad=$("dgPad");if(!list)return;
+  list.hidden=dgPadOpen;pad.hidden=!dgPadOpen;
+  if(dgPadOpen){renderPad();return}
+  list.replaceChildren();
+  const top=el("div","row");top.style.justifyContent="flex-start";top.append(mk("Draw something","primary",()=>{dgChoices=[];const pool=DG_WORDS.slice();while(dgChoices.length<3)dgChoices.push(pool.splice(Math.floor(Math.random()*pool.length),1)[0]);dgWord=null;dgStrokes=[];dgPadOpen=true;renderDraw()}));list.append(top);
+  const items=Object.entries(drawings).filter(([id,d])=>d&&d.img&&profiles[d.by]).sort((a,b)=>(b[1].created||0)-(a[1].created||0));
+  if(!items.length){const e=el("div","empty");e.append(el("strong",null,"No drawings yet"),document.createTextNode("Be the first to draw something!"));list.append(e);return}
+  items.forEach(([id,d])=>{
+    const c=el("div","card dg-card");const im=document.createElement("img");im.src=d.img;im.alt="Drawing by "+nickOf(d.by);c.append(im);
+    const solvers=dgSolvers(id);const meta=el("div","meta");meta.append(el("span",null,"by "+(d.by===myId?"you":nickOf(d.by))),el("span",null,solvers.length+(solvers.length===1?" person has":" people have")+" guessed it"));if(d.closed)meta.append(el("span","tag","Closed"));c.append(meta);
+    const mine=d.by===myId;const g=dgMyGuess(id);
+    if(mine){
+      let known=null;try{known=localStorage.getItem("yg-dg-"+id)}catch(e){}
+      c.append(el("p","dg-ok",known?"Your word: "+known:d.reveal?"The word was: "+d.reveal:"This is your drawing"));
+      if(solvers.length)c.append(el("p","sub","Guessed by "+solvers.map(nickOf).join(", ")));
+      const r=el("div","row");r.style.justifyContent="flex-start";
+      if(!d.closed)r.append(mk("Reveal and close","small",()=>dgClose(id,known)));
+      r.append(mk("Delete","small danger",()=>dgDelete(id)));c.append(r);
+    }else if(g&&g.correct){c.append(el("p","dg-ok","You got it! It was “"+(g.word||d.reveal||"")+"”"))}
+    else if(d.closed){c.append(el("p","sub",d.reveal?"The word was “"+d.reveal+"”.":"This drawing is closed."))}
+    else{
+      c.append(el("p","dg-hint",dgHint(d.hint||"")));
+      const left=3-((g&&g.tries)||0);
+      if(g&&g.wrong&&g.wrong.length){const w=el("div","dg-wrong");g.wrong.forEach(x=>w.append(el("span",null,x)));c.append(w)}
+      if(left>0){const f=el("form","dg-guess");const inp=el("input");inp.id="dgIn-"+id;inp.maxLength=30;inp.placeholder="Your guess ("+left+" left)";inp.autocomplete="off";const go=el("button","btn primary","Guess");f.append(inp,go);
+        f.onsubmit=e=>{e.preventDefault();dgGuess(id,inp.value,go)};c.append(f)}
+      else c.append(el("p","sub","Out of guesses. The answer shows when "+nickOf(d.by)+" closes it."));
+    }
+    if(!mine&&adminActive()){const r=el("div","row");r.style.justifyContent="flex-start";r.append(mk("Delete drawing","small danger",()=>dgDelete(id)));c.append(r)}
+    list.append(c);
+  });
+}
+async function dgGuess(id,raw,btn){
+  const d=drawings[id];if(!d||d.closed)return;const guess=clean(String(raw||"").trim()).slice(0,30);if(!dgNorm(guess)){toast("Type a guess");return}
+  if(!db||canWrite===false){toast("Your access is view-only");return}
+  btn.disabled=true;
+  const gid=id+"~"+myId;const cur=Object.assign({d:id,by:myId,tries:0,wrong:[],correct:false},dgGuesses[gid]||{});
+  if(cur.correct||cur.tries>=3){btn.disabled=false;return}
+  const ok=(await dgHash(id,guess))===d.hash;
+  cur.tries++;cur.at=Date.now();if(ok){cur.correct=true;cur.word=guess.toLowerCase()}else cur.wrong=(cur.wrong||[]).concat(guess);
+  try{await db.doc("dgguesses/"+gid).set(cur);dgGuesses[gid]=cur;
+    if(ok){toast("Correct! +1 point");saveScore("draw",(myBest("draw")||0)+1)}else toast(cur.tries>=3?"Not quite, and that was your last guess":"Not quite. Try again!");
+    renderDraw()}
+  catch(e){btn.disabled=false;toast("Couldn't send your guess. Try again.")}
+}
+async function dgClose(id,known){
+  const d=drawings[id];if(!d)return;
+  try{const next=Object.assign({},d,{closed:true});if(known)next.reveal=known;await db.doc("drawings/"+id).set(next);drawings[id]=next;renderDraw();toast("Drawing closed")}catch(e){toast("Couldn't close it")}
+}
+async function dgTidy(){
+  // keep the newest 25 drawings so the site stays quick to load
+  const old=Object.entries(drawings).sort((a,b)=>(b[1].created||0)-(a[1].created||0)).slice(25);
+  for(const [id] of old){try{await dgDelete(id,true)}catch(e){}}
+}
+async function dgDelete(id,quiet){
+  try{for(const [gid,g] of Object.entries(dgGuesses)){if(g&&g.d===id){try{await db.doc("dgguesses/"+gid).delete()}catch(e){}delete dgGuesses[gid]}}
+    await db.doc("drawings/"+id).delete();delete drawings[id];if(!quiet){renderDraw();toast("Drawing deleted")}}catch(e){if(!quiet)toast("Couldn't delete it")}
+}
+async function dgCreditArtist(){
+  // the artist's own device adds a point for each person who guessed their drawing
+  for(const [id,d] of Object.entries(drawings)){
+    if(!d||d.by!==myId)continue;
+    const fresh=dgSolvers(id).filter(u=>!(d.credited||[]).includes(u)&&!dgCredited.has(id+"~"+u));
+    if(!fresh.length)continue;fresh.forEach(u=>dgCredited.add(id+"~"+u));
+    try{const next=Object.assign({},d,{credited:(d.credited||[]).concat(fresh)});await db.doc("drawings/"+id).set(next);drawings[id]=next;saveScore("draw",(myBest("draw")||0)+fresh.length)}
+    catch(e){fresh.forEach(u=>dgCredited.delete(id+"~"+u))}
+  }
+}
+function renderPad(){
+  const pad=$("dgPad");pad.replaceChildren();
+  const top=el("div","row");top.style.justifyContent="space-between";top.style.width="100%";top.append(mk("← Drawings","small",()=>{dgPadOpen=false;renderDraw()}));pad.append(top);
+  if(!dgWord){pad.append(el("p","dg-word","Pick a word to draw"),el("p","sub","Don't write the word or any letters in your drawing!"));
+    const w=el("div","dg-words");dgChoices.forEach(x=>w.append(mk(x,"",()=>{dgWord=x;renderPad()})));pad.append(w);return}
+  pad.append(el("p","dg-word","Draw: "+dgWord));
+  const cv=document.createElement("canvas");cv.width=360;cv.height=360;cv.id="dgCanvas";cv.setAttribute("aria-label","Drawing area");pad.append(cv);
+  const cx=cv.getContext("2d");
+  const redraw=()=>{cx.fillStyle="#fff";cx.fillRect(0,0,360,360);cx.lineCap="round";cx.lineJoin="round";
+    dgStrokes.forEach(s=>{cx.strokeStyle=s.c;cx.lineWidth=s.w;cx.beginPath();s.p.forEach(([x,y],i)=>i?cx.lineTo(x,y):cx.moveTo(x,y));if(s.p.length===1)cx.lineTo(s.p[0][0]+.1,s.p[0][1]);cx.stroke()})};
+  redraw();
+  let cur=null;const pos=e=>{const r=cv.getBoundingClientRect();return[Math.round((e.clientX-r.left)*360/r.width),Math.round((e.clientY-r.top)*360/r.height)]};
+  cv.addEventListener("pointerdown",e=>{e.preventDefault();cv.setPointerCapture(e.pointerId);cur={c:dgColour,w:dgSize,p:[pos(e)]};dgStrokes.push(cur);redraw()});
+  cv.addEventListener("pointermove",e=>{if(!cur)return;cur.p.push(pos(e));redraw()});
+  const end=()=>{cur=null};cv.addEventListener("pointerup",end);cv.addEventListener("pointercancel",end);
+  const tools=el("div","dg-tools");
+  [["#111111","Black"],["#d33a3a","Red"],["#2f6fd0","Blue"],["#2e9a4f","Green"],["#e2a93b","Yellow"],["#8a5a2b","Brown"],["#ffffff","Rubber"]].forEach(([c,n])=>{const b=el("button","sw");b.type="button";b.style.background=c;b.setAttribute("aria-label",n);b.setAttribute("aria-pressed",String(dgColour===c));b.onclick=()=>{dgColour=c;tools.querySelectorAll(".sw").forEach(x=>x.setAttribute("aria-pressed",String(x===b)))};tools.append(b)});
+  [[3,"Thin"],[6,"Medium"],[14,"Thick"]].forEach(([w,n])=>{const b=el("button","sz",n);b.type="button";b.setAttribute("aria-pressed",String(dgSize===w));b.onclick=()=>{dgSize=w;tools.querySelectorAll(".sz").forEach(x=>x.setAttribute("aria-pressed",String(x===b)))};tools.append(b)});
+  pad.append(tools);
+  const r=el("div","row");r.style.justifyContent="center";
+  r.append(mk("Undo","",()=>{dgStrokes.pop();redraw()}),mk("Clear","",()=>{dgStrokes=[];redraw()}));
+  const post=mk("Post drawing","primary",async()=>{
+    if(!dgStrokes.length){toast("Draw something first");return}
+    if(!db||canWrite===false){toast("Your access is view-only");return}
+    if(dgSending)return;dgSending=true;post.disabled=true;
+    let q=.7,img=cv.toDataURL("image/jpeg",q);while(img.length>90000&&q>.25){q-=.15;img=cv.toDataURL("image/jpeg",q)}
+    const ref=db.collection("drawings").doc();const doc={by:myId,img,hint:dgWord.replace(/[a-z]/gi,"a"),hash:await dgHash(ref.id,dgWord),created:Date.now(),closed:false,credited:[]};
+    try{await ref.set(doc);drawings[ref.id]=doc;try{localStorage.setItem("yg-dg-"+ref.id,dgWord)}catch(e){}dgPadOpen=false;dgWord=null;dgStrokes=[];renderDraw();toast("Drawing posted! You get a point for everyone who guesses it.");dgTidy()}
+    catch(e){toast(e&&e.code==="invalid_argument"?"That drawing is too big to save. Try fewer colours.":"Couldn't post it. Try again.")}
+    dgSending=false;post.disabled=false;
+  });
+  r.append(post);pad.append(r);
+}
+
+
 function renderChat(){
   const box=$("msgs");const atBottom=box.scrollHeight-box.scrollTop-box.clientHeight<60;
   box.replaceChildren();
   const t=curThread();const list=t?(t.status==="accepted"?dmMsgs:[]):messages;
   if(!list.length){const e=el("div","empty");
     if(!t)e.append(el("strong",null,"No messages yet"),document.createTextNode("Say hi to start the chat."));
+    else if(t.kind==="group")e.append(el("strong",null,"Welcome to "+(t.name||"the group")),document.createTextNode("Say hi to everyone."));
     else if(t.status==="accepted")e.append(el("strong",null,"You're connected"),document.createTextNode("Say hi to "+nickOf(otherOf(t))+"."));
     else if(t.status==="pending")e.append(el("strong",null,"Waiting for "+nickOf(otherOf(t))),document.createTextNode("Your request has been sent. You can chat once they accept."));
     else e.append(el("strong",null,"Request declined"),document.createTextNode("You can't message "+nickOf(otherOf(t))+"."));
@@ -1764,7 +2080,7 @@ function renderChat(){
     const acts=el("span","msg-acts");
     if(canPost){const r=el("button","link","Reply");r.onclick=()=>startReply(m);acts.append(r);
       const rc=el("button","link","React");rc.setAttribute("aria-expanded",String(reactPickFor===key));rc.onclick=()=>{reactPickFor=reactPickFor===key?null:key;renderChat()};acts.append(rc)}
-    if(loggedIn&&(mine||(adminActive()&&!t))){const d=el("button","link","Delete");d.onclick=()=>(t?db.doc("dms/"+t.id).collection("msgs").doc(m.id):db.doc("chat/"+m.id)).delete().then(()=>{dropAtt(m);dropReactions(key)}).catch(()=>toast("Couldn't delete"));acts.append(d)}
+    if(loggedIn&&(mine||(adminActive()&&!t))){const d=el("button","link","Delete");d.onclick=()=>(t?thRef(t).collection("msgs").doc(m.id):db.doc("chat/"+m.id)).delete().then(()=>{dropAtt(m);dropReactions(key)}).catch(()=>toast("Couldn't delete"));acts.append(d)}
     meta.append(acts);b.append(meta);
     if(m.re&&m.re.id){const q=el("button","quote");q.type="button";q.append(el("b",null,m.re.by===myId?"You":nickOf(m.re.by)),el("span",null,m.re.text||"Message"));q.onclick=()=>jumpTo(m.re.id);b.append(q)}
     if(m.text)b.append(el("div","text",m.text));if(m.att)b.append(attView(m.att,m.by));
@@ -2036,7 +2352,7 @@ $("composer").addEventListener("submit",async e=>{
   if(replyTo&&replyTo.conv===activeConv)msg.re={id:replyTo.id,by:replyTo.by,text:replyTo.text};
   clearReply();lastTypingSent=0;
   try{
-    if(t){await db.doc("dms/"+t.id).collection("msgs").add(msg);await db.doc("dms/"+t.id).update({lastAt:msg.at,lastBy:myId,lastText:(txt||attLabel(att)).slice(0,80)})}
+    if(t){await thRef(t).collection("msgs").add(msg);await thRef(t).update({lastAt:msg.at,lastBy:myId,lastText:(txt||attLabel(att)).slice(0,80)})}
     else await db.collection("chat").add(msg);
   }catch(err){$("msgInput").value=txt;if(att)dropAtt({att});toast(err&&err.code==="quota_exceeded"?"The site is full. Ask the site owner to clear old messages.":"Message didn't send. Try again.")}
   if(!t&&Math.random()<0.1)prune();
@@ -2658,6 +2974,11 @@ async function connect(){
     db.collection("scores").onSnapshot(s=>{const p={};s.docs.forEach(d=>p[d.id]=d.data());scores=p;renderBoards()},()=>{});
     db.collection("quizzes").onSnapshot(s=>{const p={};s.docs.forEach(d=>{const v=d.data();if(v&&Array.isArray(v.questions)&&v.questions.length)p[d.id]=v});quiz.setQuizzes(p)},()=>{});
     db.collection("quizres").onSnapshot(s=>{const p={};s.docs.forEach(d=>p[d.id]=d.data());quiz.setResults(p)},()=>{});
+    db.collection("groups").onSnapshot(sn=>{const p={};sn.docs.forEach(d=>p[d.id]=d.data());const firstLoad=!groupsLoaded;groups=p;groupsLoaded=true;
+      if(firstLoad&&dmSeen){myThreads().filter(t=>t.kind==="group").forEach(t=>{if(t.status==="pending")dmSeen.add(t.id);dmLast[t.id]=t.lastAt||0})}
+      onDmsChange(false)},()=>{});
+    db.collection("drawings").onSnapshot(sn=>{const p={};sn.docs.forEach(d=>p[d.id]=d.data());drawings=p;if(view==="draw"&&!dgPadOpen)renderDraw();dgCreditArtist()},()=>{});
+    db.collection("dgguesses").onSnapshot(sn=>{const p={};sn.docs.forEach(d=>p[d.id]=d.data());dgGuesses=p;if(view==="draw"&&!dgPadOpen)renderDraw();dgCreditArtist()},()=>{});
     db.collection("reactions").onSnapshot(sn=>{const p={};sn.docs.forEach(d=>p[d.id]=d.data());reactions=p;if(view==="chat")renderChat()},()=>{});
     db.collection("versus").onSnapshot(sn=>{const p={};sn.docs.forEach(d=>p[d.id]=d.data());vsGames=p;onVersusSnapshot()},()=>{});
     db.collection("polls").onSnapshot(sn=>{const p={};sn.docs.forEach(d=>p[d.id]=d.data());polls=p;if(view==="polls")renderPolls()},()=>{});
