@@ -297,6 +297,51 @@ canvas{width:100%;height:auto;border-radius:10px;touch-action:none;display:block
 .announce .tx b{display:block;font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
 .announce .tx p{margin:2px 0 0;font-weight:700;white-space:pre-wrap;overflow-wrap:anywhere}
 
+/* home extras: birthdays + countdowns */
+.bday-banner{display:flex;gap:12px;align-items:center;padding:14px 16px;border-radius:14px;background:color-mix(in srgb,#f4a3c0 28%,var(--surface));border:1px solid #f4a3c0}
+.bday-banner .ic{background:#f4a3c0;color:#14213d;width:40px;height:40px;border-radius:10px}
+.bday-banner .ic svg{width:22px;height:22px}
+.bday-banner b{font-family:var(--font-display);font-size:1.05rem}
+.bday-banner p{margin:0;color:var(--muted);font-size:.85rem}
+.countdowns{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
+.cd{border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.cd .n{font-family:var(--font-display);font-size:2rem;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+.cd .u{font-size:.75rem;color:var(--muted);font-weight:800;letter-spacing:.06em;text-transform:uppercase}
+.cd .t{font-weight:800;margin-top:6px;overflow-wrap:anywhere}
+.cd .d{font-size:.78rem;color:var(--muted)}
+.cd.today{border-color:var(--gold);background:var(--gold-soft)}
+
+/* polls */
+.poll-list{display:flex;flex-direction:column;gap:12px;max-width:760px}
+.poll{padding:16px 18px;display:flex;flex-direction:column;gap:10px}
+.poll h3{margin:0;font-size:1.1rem;overflow-wrap:anywhere}
+.poll .meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:.8rem;color:var(--muted)}
+.poll-opt{position:relative;display:flex;align-items:center;gap:10px;width:100%;text-align:left;border:1.5px solid var(--line);background:var(--surface-2);border-radius:10px;padding:10px 12px;font-weight:700;overflow:hidden;color:var(--ink)}
+.poll-opt .fill{position:absolute;inset:0 auto 0 0;background:color-mix(in srgb,var(--gold) 26%,transparent);z-index:0;transition:width .3s}
+.poll-opt > span{position:relative;z-index:1}
+.poll-opt .lbl{flex:1;min-width:0;overflow-wrap:anywhere}
+.poll-opt .pc{font-family:var(--font-mono);font-variant-numeric:tabular-nums;font-size:.85rem}
+.poll-opt.mine{border-color:var(--gold)}
+.poll-opt.mine .lbl::after{content:" ✓";color:var(--good)}
+.poll-opt:not(:disabled):hover{border-color:var(--gold)}
+.poll-opt:disabled{cursor:default}
+.tag{display:inline-block;border-radius:999px;padding:0 8px;font-size:.72rem;font-weight:800;background:var(--line);color:var(--ink)}
+.poll .row{justify-content:flex-start}
+
+/* birthdays */
+.bday-list{display:flex;flex-direction:column;gap:8px}
+.bday-row{display:flex;align-items:center;gap:12px;border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--surface-2)}
+.bday-row .who{flex:1;min-width:0}
+.bday-row .who b{display:block;overflow-wrap:anywhere}
+.bday-row .who small{color:var(--muted)}
+.bday-row .when{font-weight:800;font-size:.85rem;white-space:nowrap}
+.bday-row.today{border-color:#f4a3c0;background:color-mix(in srgb,#f4a3c0 22%,var(--surface))}
+.bday-form{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap}
+.bday-form label{display:flex;flex-direction:column;gap:4px;font-weight:700;font-size:.8rem;color:var(--muted)}
+.bday-form select{border:1.5px solid var(--line);border-radius:8px;padding:9px 12px;background:var(--surface-2);font-weight:600;color:var(--ink)}
+.cd-admin{display:flex;flex-direction:column;gap:8px}
+.cd-admin .admin-row .who b{display:block}
+
 /* quizzes */
 .quiz-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
 .qcard{display:flex;flex-direction:column;gap:10px;padding:16px;overflow:hidden;border:1px solid var(--line);background:var(--surface);border-radius:14px}
@@ -431,6 +476,7 @@ canvas{width:100%;height:auto;border-radius:10px;touch-action:none;display:block
   <!-- HOME -->
   <section class="home" id="view-home" hidden>
     <div class="announce" id="announceBox" hidden></div>
+    <div class="bday-banner" id="bdayBanner" hidden></div>
     <div class="hero">
       <div class="card greet">
         <p class="eyebrow" id="today"></p>
@@ -443,6 +489,10 @@ canvas{width:100%;height:auto;border-radius:10px;touch-action:none;display:block
         <div class="stat"><span class="v" id="statMembers">0</span><span class="l">Members</span></div>
         <div class="stat"><span class="v" id="statToday">0</span><span class="l">Messages today</span></div>
       </div>
+    </div>
+    <div id="cdSection" hidden>
+      <div class="section-head"><h2>Countdowns</h2></div>
+      <div class="countdowns" id="countdowns"></div>
     </div>
     <div>
       <div class="section-head"><h2>Apps</h2><button class="link" id="renameBtn" hidden>Rename site</button></div>
@@ -695,10 +745,43 @@ canvas{width:100%;height:auto;border-radius:10px;touch-action:none;display:block
       </div>
 
       <div class="card pane">
+        <h2>Countdowns</h2>
+        <p class="sub">Countdowns show on everyone's home page. Each one disappears the day after its date.</p>
+        <div class="set-grid"><label>What's happening<input class="field" id="cdTitle" maxlength="40" placeholder="e.g. Half term"></label><label>Date<input class="field" id="cdDate" type="date"></label></div>
+        <div class="row"><button class="btn primary" id="cdAdd">Add countdown</button></div>
+        <div class="cd-admin admin-list" id="cdAdminList"></div>
+      </div>
+
+      <div class="card pane">
         <h2>Site name</h2>
         <div class="set-grid"><label>Name<input class="field" id="adminSiteName" maxlength="30"></label></div>
         <div class="row"><button class="btn primary" id="adminSiteSave">Save site name</button></div>
       </div>
+    </div>
+  </section>
+
+  <!-- POLLS -->
+  <section id="view-polls" hidden>
+    <div class="view-head"><button class="back" data-open="home">← Home</button><h1>Polls</h1><p>Ask the year a question, or vote on someone else's. You get one vote per poll, and you can change it while the poll is open.</p></div>
+    <div class="toolbar"><button class="btn primary" id="pollNew">Make a poll</button></div>
+    <div class="poll-list" id="pollList"></div>
+  </section>
+
+  <!-- BIRTHDAYS -->
+  <section id="view-birthdays" hidden>
+    <div class="view-head"><button class="back" data-open="home">← Home</button><h1>Birthdays</h1><p>Add your birthday and the home page will wish you a happy birthday on the day. Only the day and month are saved, never the year.</p></div>
+    <div class="card pane" style="margin-bottom:14px">
+      <h3 style="margin:0 0 10px;font-size:1rem">Your birthday</h3>
+      <div class="bday-form">
+        <label>Day<select id="bdDay"></select></label>
+        <label>Month<select id="bdMonth"></select></label>
+        <button class="btn primary" id="bdSave">Save</button>
+        <button class="btn" id="bdRemove">Remove</button>
+      </div>
+    </div>
+    <div class="card pane">
+      <h3 style="margin:0 0 10px;font-size:1rem">Coming up</h3>
+      <div class="bday-list" id="bdayList"></div>
     </div>
   </section>
 
@@ -739,6 +822,8 @@ const ICONS = {
   mypin:'<rect x="5" y="10.5" width="14" height="10" rx="2" '+S2+'/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3" '+S2+'/><circle cx="12" cy="15.5" r="1.4" fill="currentColor"/>',
   settings:'<circle cx="12" cy="12" r="3" '+S2+'/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1" '+S2+' stroke-linecap="round"/>',
   admin:'<path d="M12 3l7 3v5c0 4.5-3 8.3-7 10-4-1.7-7-5.5-7-10V6z" '+S2+' stroke-linejoin="round"/><circle cx="12" cy="11" r="2" fill="currentColor"/><path d="M12 13v3" '+S2+' stroke-linecap="round"/>',
+  polls:'<path d="M5 20V11M12 20V5M19 20v-6" '+S2+' stroke-width="3" stroke-linecap="round"/>',
+  birthdays:'<rect x="4" y="11" width="16" height="9" rx="2" '+S2+'/><path d="M4 15c2 1.5 4 1.5 5.3 0s3.4-1.5 5.4 0 4 1.5 5.3 0M12 11V8" '+S2+' stroke-linecap="round"/><path d="M12 3.5c1 1.2 1 2.3 0 3-1-.7-1-1.8 0-3z" fill="currentColor"/>',
   leaders:'<path d="M7 4h10v4a5 5 0 0 1-10 0z" '+S2+'/><path d="M7 6H4v1a3 3 0 0 0 3 3M17 6h3v1a3 3 0 0 1-3 3M12 13v4M8 20h8" '+S2+' stroke-linecap="round"/>',
   snake:'<path d="M4 18h8a3 3 0 0 0 0-6H9a3 3 0 0 1 0-6h9" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><circle cx="19" cy="6" r="1.6" fill="currentColor"/>',
   hopper:'<circle cx="10" cy="13" r="6" '+S2+'/><circle cx="12" cy="11" r="1.2" fill="currentColor"/><path d="M15.5 13.5 21 12l-4.5 3.5M5 13c1.5-2 3-2 4.5 0" '+S2+' stroke-linejoin="round" stroke-linecap="round"/>',
@@ -750,7 +835,7 @@ const ICONS = {
   ttt:'<path d="M9 3v18M15 3v18M3 9h18M3 15h18" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4.5 4.5l3 3m0-3l-3 3" stroke="currentColor" stroke-width="1.8"/><circle cx="18" cy="18" r="1.8" '+S2+' stroke-width="1.8"/>'
 };
 const svg=id=>'<svg viewBox="0 0 24 24" aria-hidden="true">'+ICONS[id]+'</svg>';
-const APPS=[["chat","Chat","Talk to the whole year group"],["people","People","Who's online and who's joined"],["homework","Homework","Your homework and due dates"],["quizzes","Quizzes","Play and make quizzes for your year"],["games","Games","Eight games with year leaderboards"],["leaders","Leaderboards","The year's top scores"],["mypin","My PIN","Lock your account with a PIN"],["settings","Settings","Theme, text size and your account"],["admin","Admin","Announcements, PINs, muting and more"]];
+const APPS=[["chat","Chat","Talk to the whole year group"],["people","People","Who's online and who's joined"],["homework","Homework","Your homework and due dates"],["quizzes","Quizzes","Play and make quizzes for your year"],["games","Games","Eight games with year leaderboards"],["polls","Polls","Vote on questions from your year"],["birthdays","Birthdays","Whose birthday is coming up"],["leaders","Leaderboards","The year's top scores"],["mypin","My PIN","Lock your account with a PIN"],["settings","Settings","Theme, text size and your account"],["admin","Admin","Announcements, PINs, muting and more"]];
 const GAMES=[
   {id:"snake",name:"Snake",desc:"Eat, grow, don't crash.",lower:false,unit:""},
   {id:"hopper",name:"Sky Hopper",desc:"Tap to flap through the gaps.",lower:false,unit:""},
@@ -762,12 +847,12 @@ const GAMES=[
   {id:"ttt",name:"Noughts & Crosses",desc:"Three in a row beats the computer.",scored:false}
 ];
 const SCORED=GAMES.filter(g=>g.scored!==false);
-const VIEWS=["start","mypin","settings","admin","home","chat","people","homework","quizzes","quizplay","quizmake","games","leaders",...GAMES.map(g=>g.id)];
+const VIEWS=["start","mypin","settings","admin","polls","birthdays","home","chat","people","homework","quizzes","quizplay","quizmake","games","leaders",...GAMES.map(g=>g.id)];
 
 let db=null, user=null, room=null, assets=null, myId=sess.get("yg-student"), isOwner=false, canWrite=null, dbReady=false, admins=[];
 const isAdmin=id=>!!id&&admins.includes(id);
 const adminActive=()=>loggedIn&&isAdmin(myId)&&!!(profiles[myId]||{}).pinHash;
-let profiles={}, scores={}, peers=[], messages=[], announcement=null, muted=[];
+let profiles={}, scores={}, peers=[], messages=[], announcement=null, muted=[], polls={}, pollVotes={}, countdowns={};
 const isMuted=id=>!!id&&muted.includes(id);
 let loggedIn=false, view="start";
 let pendingView=(()=>{const h=location.hash.slice(1);return VIEWS.includes(h)&&h!=="start"?h:null})();
@@ -803,6 +888,8 @@ function open(v){
   if(v==="word")word.load();
   if(v==="mypin")renderPin();
   if(v==="settings")renderSettings();
+  if(v==="polls")renderPolls();
+  if(v==="birthdays")renderBirthdays(true);
   if(v==="admin"){$("adminSearch").value="";renderAdmin()}
   window.scrollTo(0,0);
   try{history.replaceState(null,"",(v==="home"||v==="start")?location.pathname+location.search:"#"+v)}catch(e){}
@@ -827,7 +914,7 @@ SCORED.forEach(g=>{const c=el("div","card board");c.append(el("h3",null,g.name+(
 
 /* ---------- home ---------- */
 function renderHome(){
-  renderAnnouncement();
+  renderAnnouncement();renderCountdowns();renderBdayBanner();
   const now=new Date();
   $("today").textContent=now.toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"});
   const h=now.getHours();const part=h<12?"Good morning":h<18?"Good afternoon":"Good evening";
@@ -863,6 +950,7 @@ function renderAccount(){
   if(loggedIn&&view==="start"){const v=pendingView||"home";pendingView=null;open(v)}
   else if(!loggedIn&&view!=="start")open("start");
   renderStart();hwSync();dmSync();renderPeople();renderChat();renderHome();renderBoards();quiz.refresh();
+  if(view==="birthdays")renderBirthdays(false);if(view==="polls")renderPolls();
   if(view==="admin"){if(adminActive())renderAdmin();else open("home")}
 }
 function closeModal(){$("overlay").hidden=true;$("modal").replaceChildren();$("modal").onkeydown=null}
@@ -1045,6 +1133,7 @@ function renderAdmin(){
   $("chatClear").disabled=!messages.length;
   // leaderboards
   const sel=$("lbGame");if(!sel.options.length){const o=el("option",null,"All games");o.value="";sel.append(o);SCORED.forEach(g=>{const x=el("option",null,g.name);x.value=g.id;sel.append(x)})}
+  renderCdAdmin();
   // site name
   if(document.activeElement!==$("adminSiteName"))$("adminSiteName").value=$("siteName").textContent;
   // students
@@ -1166,6 +1255,157 @@ function adminSetPin(uid){
     btnRow(m,mk("Cancel","",closeModal),go);
   });
 }
+/* ---------- countdowns ---------- */
+const MONTHS=["January","February","March","April","May","June","July","August","September","October","November","December"];
+const today0=()=>{const d=new Date();d.setHours(0,0,0,0);return d};
+const daysUntil=ymdStr=>Math.round((new Date(ymdStr+"T00:00:00")-today0())/864e5);
+const fmtDate=ymdStr=>new Date(ymdStr+"T12:00:00").toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"long"});
+function upcomingCountdowns(){return Object.entries(countdowns).map(([id,c])=>Object.assign({id},c)).filter(c=>/^\d{4}-\d{2}-\d{2}$/.test(c.date||"")&&daysUntil(c.date)>=0).sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:0)}
+function renderCountdowns(){
+  const box=$("countdowns");if(!box)return;box.replaceChildren();
+  const list=upcomingCountdowns().slice(0,6);
+  $("cdSection").hidden=!list.length;
+  list.forEach(c=>{const n=daysUntil(c.date);const d=el("div","cd"+(n===0?" today":""));
+    d.append(el("span","n",n===0?"Today":String(n)),el("span","u",n===0?"it's here":n===1?"day to go":"days to go"),el("span","t",c.title),el("span","d",fmtDate(c.date)));box.append(d)});
+  if(view==="admin")renderCdAdmin();
+}
+function renderCdAdmin(){
+  const box=$("cdAdminList");if(!box)return;box.replaceChildren();
+  const list=upcomingCountdowns();
+  if(!list.length){box.append(el("p","sub","No countdowns yet."));return}
+  list.forEach(c=>{const r=el("div","admin-row");const w=el("div","who");const n=daysUntil(c.date);
+    w.append(el("b",null,c.title),el("small",null,fmtDate(c.date)+" · "+(n===0?"today":n===1?"tomorrow":"in "+n+" days")));
+    const a=el("div","acts");a.append(mk("Delete","small danger",async()=>{try{await db.doc("countdowns/"+c.id).delete();delete countdowns[c.id];renderCountdowns();renderCdAdmin();toast("Countdown deleted")}catch(e){toast("Couldn't delete")}}));
+    r.append(w,a);box.append(r)});
+}
+$("cdAdd").onclick=async()=>{
+  if(!adminActive())return;
+  const title=clean($("cdTitle").value.trim()).slice(0,40),date=$("cdDate").value;
+  if(!title){toast("Say what the countdown is for");$("cdTitle").focus();return}
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(date)){toast("Pick a date");return}
+  if(daysUntil(date)<0){toast("Pick a date that hasn't happened yet");return}
+  $("cdAdd").disabled=true;
+  try{const ref=db.collection("countdowns").doc();const doc={title,date,by:myId,created:Date.now()};await ref.set(doc);countdowns[ref.id]=doc;$("cdTitle").value="";$("cdDate").value="";renderCountdowns();renderCdAdmin();toast("Countdown added")}
+  catch(e){toast("Couldn't add that. Try again.")}
+  $("cdAdd").disabled=false;
+};
+
+/* ---------- birthdays ---------- */
+const CAKE='<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="11" width="16" height="9" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 15c2 1.5 4 1.5 5.3 0s3.4-1.5 5.4 0 4 1.5 5.3 0M12 11V8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M12 3.5c1 1.2 1 2.3 0 3-1-.7-1-1.8 0-3z" fill="currentColor"/></svg>';
+const validBday=b=>/^(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/.test(b||"");
+const fmtBday=b=>validBday(b)?Number(b.slice(3))+" "+MONTHS[Number(b.slice(0,2))-1]:"";
+function daysToBday(b){
+  const t=today0();const m=Number(b.slice(0,2))-1,d=Number(b.slice(3));
+  let next=new Date(t.getFullYear(),m,d);
+  if(m===1&&d===29&&next.getMonth()!==1)next=new Date(t.getFullYear(),2,1);
+  if(next<t){next=new Date(t.getFullYear()+1,m,d);if(m===1&&d===29&&next.getMonth()!==1)next=new Date(t.getFullYear()+1,2,1)}
+  return Math.round((next-t)/864e5);
+}
+function birthdayPeople(){return Object.keys(profiles).filter(id=>validBday(profiles[id].birthday)).map(id=>({id,b:profiles[id].birthday,n:daysToBday(profiles[id].birthday)})).sort((a,b)=>a.n-b.n||nickOf(a.id).localeCompare(nickOf(b.id)))}
+function renderBdayBanner(){
+  const box=$("bdayBanner");if(!box)return;box.replaceChildren();
+  const today=birthdayPeople().filter(x=>x.n===0);
+  if(!today.length){box.hidden=true;return}
+  const mine=today.some(x=>x.id===myId);const others=today.filter(x=>x.id!==myId).map(x=>nickOf(x.id));
+  const ic=el("span","ic");ic.innerHTML=CAKE;const tx=el("div");
+  const names=others.length>1?others.slice(0,-1).join(", ")+" and "+others[others.length-1]:others[0];
+  tx.append(el("b",null,mine?"Happy birthday, "+nickOf(myId)+"!":"It's "+names+"'s birthday today!"),el("p",null,mine?(others.length?"You share your birthday with "+names+".":"Have a great day."):"Send them a message in the chat."));
+  box.append(ic,tx);box.hidden=false;
+}
+(function fillBdaySelects(){
+  const d=$("bdDay"),m=$("bdMonth");
+  const o0=el("option",null,"Day");o0.value="";d.append(o0);for(let i=1;i<=31;i++){const o=el("option",null,String(i));o.value=String(i).padStart(2,"0");d.append(o)}
+  const m0=el("option",null,"Month");m0.value="";m.append(m0);MONTHS.forEach((n,i)=>{const o=el("option",null,n);o.value=String(i+1).padStart(2,"0");m.append(o)});
+})();
+function renderBirthdays(fillForm){
+  const p=profiles[myId];
+  if(fillForm&&p){const b=validBday(p.birthday)?p.birthday:"";$("bdDay").value=b?b.slice(3):"";$("bdMonth").value=b?b.slice(0,2):"";$("bdRemove").hidden=!b}
+  const box=$("bdayList");box.replaceChildren();
+  const list=birthdayPeople();
+  if(!list.length){box.append(el("p","sub","No one has added their birthday yet. Be the first!"));return}
+  list.forEach(x=>{const r=el("div","bday-row"+(x.n===0?" today":""));r.append(dotFor(profiles[x.id]));
+    const w=el("div","who");w.append(el("b",null,x.id===myId?nickOf(x.id)+" (you)":nickOf(x.id)),el("small",null,fmtBday(x.b)));r.append(w);
+    r.append(el("span","when",x.n===0?"Today!":x.n===1?"Tomorrow":"In "+x.n+" days"));box.append(r)});
+}
+async function saveBday(val){
+  if(!db||canWrite===false){toast("Your access is view-only");return}
+  const p=profiles[myId];if(!p)return;
+  const d=Object.assign({},p);if(val)d.birthday=val;else delete d.birthday;
+  try{await db.doc("profiles/"+myId).set(d);profiles[myId]=d;renderBirthdays(true);renderBdayBanner();toast(val?"Birthday saved: "+fmtBday(val):"Birthday removed")}
+  catch(e){toast("Couldn't save. Try again.")}
+}
+$("bdSave").onclick=()=>{
+  const d=$("bdDay").value,m=$("bdMonth").value;
+  if(!d||!m){toast("Pick a day and a month");return}
+  const maxDay=[31,29,31,30,31,30,31,31,30,31,30,31][Number(m)-1];
+  if(Number(d)>maxDay){toast(MONTHS[Number(m)-1]+" only has "+maxDay+" days");return}
+  saveBday(m+"-"+d);
+};
+$("bdRemove").onclick=()=>saveBday(null);
+
+/* ---------- polls ---------- */
+const voteId=(pid,uid)=>pid+"~"+uid;
+function pollTally(pid){const t={},by={};Object.values(pollVotes).forEach(v=>{if(v&&v.poll===pid&&profiles[v.by]){t[v.choice]=(t[v.choice]||0)+1;by[v.by]=v.choice}});return{t,by}}
+function renderPolls(){
+  const box=$("pollList");if(!box)return;box.replaceChildren();
+  const list=Object.entries(polls).filter(([id,p])=>p&&Array.isArray(p.options)).sort((a,b)=>(b[1].created||0)-(a[1].created||0));
+  if(!list.length){const e=el("div","empty");e.append(el("strong",null,"No polls yet"),document.createTextNode("Make the first one!"));box.append(e);return}
+  list.forEach(([id,p])=>{
+    const {t,by}=pollTally(id);const total=Object.values(t).reduce((a,b)=>a+b,0);const mine=by[myId];
+    const c=el("div","card poll");c.append(el("h3",null,p.q));
+    const meta=el("div","meta");meta.append(el("span",null,"by "+(p.by===myId?"you":nickOf(p.by))),el("span",null,total+(total===1?" vote":" votes")));if(p.closed)meta.append(el("span","tag","Closed"));c.append(meta);
+    p.options.forEach((o,i)=>{const n=t[i]||0;const pc=total?Math.round(n/total*100):0;
+      const b=el("button","poll-opt"+(mine===i?" mine":""));b.disabled=!!p.closed||!loggedIn;
+      const fill=el("span","fill");fill.style.width=(mine===undefined&&!p.closed?0:pc)+"%";
+      b.append(fill,el("span","lbl",o),el("span","pc",(mine===undefined&&!p.closed)?"":pc+"% · "+n));
+      b.setAttribute("aria-label",o+(mine===i?", your vote":"")+(mine!==undefined||p.closed?", "+pc+" percent":""));
+      b.onclick=()=>vote(id,i);c.append(b)});
+    if(mine===undefined&&!p.closed)c.append(el("p","sub","Vote to see the results."));
+    if(p.by===myId||adminActive()){const r=el("div","row");
+      r.append(mk(p.closed?"Reopen poll":"Close poll","small",async()=>{try{await db.doc("polls/"+id).update({closed:!p.closed});polls[id]=Object.assign({},p,{closed:!p.closed});renderPolls()}catch(e){toast("Couldn't change that")}}));
+      r.append(mk("Delete","small danger",()=>confirmDelPoll(id,p)));c.append(r)}
+    box.append(c);
+  });
+}
+async function vote(pid,choice){
+  const p=polls[pid];if(!p||p.closed||!loggedIn)return;
+  if(!db||canWrite===false){toast("Your access is view-only");return}
+  const vid=voteId(pid,myId);const cur=pollVotes[vid];
+  try{
+    if(cur&&cur.choice===choice){await db.doc("pollvotes/"+vid).delete();delete pollVotes[vid];toast("Vote removed")}
+    else{const v={poll:pid,by:myId,choice,at:Date.now()};await db.doc("pollvotes/"+vid).set(v);pollVotes[vid]=v}
+    renderPolls();
+  }catch(e){toast("Couldn't save your vote. Try again.")}
+}
+function confirmDelPoll(id,p){
+  modal("Delete this poll?",m=>{m.append(el("p",null,"“"+p.q+"” and all its votes will be deleted."));
+    const go=mk("Delete","danger solid",async()=>{go.disabled=true;try{
+      for(const [vid,v] of Object.entries(pollVotes)){if(v&&v.poll===id){try{await db.doc("pollvotes/"+vid).delete()}catch(e){}delete pollVotes[vid]}}
+      await db.doc("polls/"+id).delete();delete polls[id];closeModal();renderPolls();toast("Poll deleted")}catch(e){go.disabled=false;toast("Couldn't delete")}});
+    btnRow(m,mk("Cancel","",closeModal),go)});
+}
+$("pollNew").onclick=()=>{
+  if(!loggedIn||!db||canWrite===false){toast("Your access is view-only, so you can't make a poll");return}
+  modal("Make a poll",m=>{
+    const ql=el("label",null,"Question");const qi=el("input");qi.id="pollQ";qi.maxLength=120;qi.placeholder="e.g. Best school dinner?";qi.autocomplete="off";ql.append(qi);m.append(ql);
+    const opts=el("div");opts.style.display="flex";opts.style.flexDirection="column";opts.style.gap="8px";m.append(opts);
+    const addOpt=()=>{if(opts.children.length>=6)return;const i=el("input");i.maxLength=60;i.autocomplete="off";i.placeholder="Answer "+(opts.children.length+1);i.className="pollOpt";i.id="pollOpt"+opts.children.length;opts.append(i);more.hidden=opts.children.length>=6};
+    const more=el("button","link","Add another answer");more.type="button";more.style.alignSelf="flex-start";more.onclick=()=>{addOpt();opts.lastChild.focus()};
+    m.append(more);addOpt();addOpt();
+    const err=el("p","err");err.hidden=true;m.append(err);
+    const go=mk("Post poll","primary",async()=>{
+      const q=clean(qi.value.trim()).slice(0,120);const options=[...opts.querySelectorAll("input")].map(i=>clean(i.value.trim()).slice(0,60)).filter(Boolean);
+      if(q.length<3){err.textContent="Write a question.";err.hidden=false;return}
+      if(options.length<2){err.textContent="Give at least two answers.";err.hidden=false;return}
+      if(new Set(options.map(o=>o.toLowerCase())).size!==options.length){err.textContent="Two of the answers are the same.";err.hidden=false;return}
+      go.disabled=true;
+      try{const ref=db.collection("polls").doc();const doc={q,options,by:myId,created:Date.now(),closed:false};await ref.set(doc);polls[ref.id]=doc;closeModal();renderPolls();toast("Poll posted")}
+      catch(e){go.disabled=false;err.textContent=e&&e.code==="quota_exceeded"?"The site is full. Ask an admin to delete old polls.":"Couldn't post the poll. Try again.";err.hidden=false}
+    });
+    btnRow(m,mk("Cancel","",closeModal),go);
+  });
+};
+
 /* ---------- settings ---------- */
 const hostTheme=document.documentElement.getAttribute("data-theme");
 let appliedKey="";
@@ -1197,7 +1437,7 @@ function renderSettings(){
   const pr=section("Your profile");
   const row=el("div","me-row");const who=el("div","who");who.append(el("b",null,p.nick),el("small",null,(p.pinHash?"Locked with a PIN":"No PIN set")+(p.joined?" · joined "+new Date(p.joined).toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"}):"")));
   row.append(dotFor(p),who);pr.append(row);
-  const pb=el("div","row");pb.style.justifyContent="flex-start";const pin=el("button","btn",p.pinHash?"Change PIN":"Set a PIN");pin.dataset.open="mypin";pb.append(mk("Edit name and colour","",openEditProfile),pin);pr.append(pb);
+  const pb=el("div","row");pb.style.justifyContent="flex-start";const pin=el("button","btn",p.pinHash?"Change PIN":"Set a PIN");pin.dataset.open="mypin";const bd=el("button","btn",p.birthday?"Birthday: "+fmtBday(p.birthday):"Add your birthday");bd.dataset.open="birthdays";pb.append(mk("Edit name and colour","",openEditProfile),pin,bd);pr.append(pb);
 
   // appearance
   const ap=section("Appearance");const g=el("div","set-grid");
@@ -2058,6 +2298,9 @@ async function connect(){
     db.collection("scores").onSnapshot(s=>{const p={};s.docs.forEach(d=>p[d.id]=d.data());scores=p;renderBoards()},()=>{});
     db.collection("quizzes").onSnapshot(s=>{const p={};s.docs.forEach(d=>{const v=d.data();if(v&&Array.isArray(v.questions)&&v.questions.length)p[d.id]=v});quiz.setQuizzes(p)},()=>{});
     db.collection("quizres").onSnapshot(s=>{const p={};s.docs.forEach(d=>p[d.id]=d.data());quiz.setResults(p)},()=>{});
+    db.collection("polls").onSnapshot(sn=>{const p={};sn.docs.forEach(d=>p[d.id]=d.data());polls=p;if(view==="polls")renderPolls()},()=>{});
+    db.collection("pollvotes").onSnapshot(sn=>{const p={};sn.docs.forEach(d=>p[d.id]=d.data());pollVotes=p;if(view==="polls")renderPolls()},()=>{});
+    db.collection("countdowns").onSnapshot(sn=>{const p={};sn.docs.forEach(d=>p[d.id]=d.data());countdowns=p;renderCountdowns()},()=>{});
     db.doc("announce/current").onSnapshot(sn=>{announcement=sn.exists?sn.data():null;renderAnnouncement();if(view==="admin")renderAdmin()},()=>{});
     db.doc("moderation/state").onSnapshot(sn=>{muted=(sn.exists&&Array.isArray(sn.data().muted))?sn.data().muted:[];renderChatHead();if(view==="admin")renderAdmin()},()=>{});
     db.doc("config/admins").onSnapshot(s=>{admins=(s.exists&&Array.isArray(s.data().ids))?s.data().ids:[];renderPeople();renderHome();renderChat();quiz.refresh();renderApps();if(view==="settings")renderSettings();if(view==="admin"){if(adminActive())renderAdmin();else open("home")}},()=>{});
