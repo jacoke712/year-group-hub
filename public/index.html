@@ -277,6 +277,26 @@ canvas{width:100%;height:auto;border-radius:10px;touch-action:none;display:block
 .admin-search{border:1.5px solid var(--line);border-radius:8px;padding:9px 12px;background:var(--surface-2);font-weight:500;color:var(--ink);width:100%;max-width:360px}
 .admin-badge{display:inline-block;margin-left:6px;border-radius:999px;padding:0 8px;font-size:.7rem;font-weight:800;background:var(--gold-soft);color:var(--ink);border:1px solid var(--gold);vertical-align:middle}
 
+.admin-wrap{display:flex;flex-direction:column;gap:14px}
+.admin-wrap .pane{display:flex;flex-direction:column;gap:10px}
+.admin-wrap h2{margin:0;font-size:1.05rem}
+.admin-wrap .pane > .sub{margin:0}
+.admin-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--line);border-radius:14px;overflow:hidden;border:1px solid var(--line)}
+@media (max-width:560px){.admin-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.admin-stats div{background:var(--surface);padding:14px;display:flex;flex-direction:column}
+.admin-stats b{font-family:var(--font-display);font-size:1.6rem;font-variant-numeric:tabular-nums;line-height:1.1}
+.admin-stats span{font-size:.78rem;color:var(--muted);font-weight:700}
+.admin-wrap textarea,.admin-wrap select,.admin-wrap .field{border:1.5px solid var(--line);border-radius:8px;padding:9px 12px;background:var(--surface-2);font:inherit;font-weight:500;color:var(--ink);width:100%;min-width:0}
+.admin-wrap textarea{min-height:76px;resize:vertical}
+.admin-wrap .row{justify-content:flex-start}
+.muted-tag{display:inline-block;margin-left:6px;border-radius:999px;padding:0 8px;font-size:.7rem;font-weight:800;background:color-mix(in srgb,var(--bad) 16%,var(--surface));color:var(--bad);vertical-align:middle}
+.announce{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border-radius:14px;background:var(--gold-soft);border:1px solid var(--gold)}
+.announce .ic{width:38px;height:38px;border-radius:10px}
+.announce .ic svg{width:20px;height:20px}
+.announce .tx{flex:1;min-width:0}
+.announce .tx b{display:block;font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.announce .tx p{margin:2px 0 0;font-weight:700;white-space:pre-wrap;overflow-wrap:anywhere}
+
 /* quizzes */
 .quiz-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
 .qcard{display:flex;flex-direction:column;gap:10px;padding:16px;overflow:hidden;border:1px solid var(--line);background:var(--surface);border-radius:14px}
@@ -410,6 +430,7 @@ canvas{width:100%;height:auto;border-radius:10px;touch-action:none;display:block
 
   <!-- HOME -->
   <section class="home" id="view-home" hidden>
+    <div class="announce" id="announceBox" hidden></div>
     <div class="hero">
       <div class="card greet">
         <p class="eyebrow" id="today"></p>
@@ -640,11 +661,44 @@ canvas{width:100%;height:auto;border-radius:10px;touch-action:none;display:block
 
   <!-- ADMIN -->
   <section id="view-admin" hidden>
-    <div class="view-head"><button class="back" data-open="home">← Home</button><h1>Admin</h1><p>Only admins can see this. If someone forgets their PIN, give them a new one here and tell them what it is, or turn their PIN off so they can choose their own.</p></div>
-    <div class="card pane">
-      <label for="adminSearch" class="eyebrow" style="display:block;margin-bottom:6px">Find a student</label>
-      <input id="adminSearch" class="admin-search" placeholder="Type a name" autocomplete="off">
-      <div class="admin-list" id="adminList"></div>
+    <div class="view-head"><button class="back" data-open="home">← Home</button><h1>Admin</h1><p>Tools for running the site. Only admins can see this page.</p></div>
+    <div class="admin-wrap">
+      <div class="admin-stats" id="adminStats"></div>
+
+      <div class="card pane">
+        <h2>Announcement</h2>
+        <p class="sub">Shows at the top of everyone's home page until you remove it.</p>
+        <p class="sub" id="annNow"></p>
+        <textarea id="annText" maxlength="200" placeholder="e.g. Non-uniform day this Friday!"></textarea>
+        <div class="row"><button class="btn primary" id="annPost">Post announcement</button><button class="btn" id="annRemove">Remove announcement</button></div>
+      </div>
+
+      <div class="card pane">
+        <h2>Students</h2>
+        <p class="sub">Change PINs, fix names, mute someone in the year chat, or remove an account.</p>
+        <label for="adminSearch" class="eyebrow">Find a student</label>
+        <input id="adminSearch" class="admin-search" placeholder="Type a name" autocomplete="off">
+        <div class="admin-list" id="adminList"></div>
+      </div>
+
+      <div class="card pane">
+        <h2>Year chat</h2>
+        <p class="sub" id="chatCount"></p>
+        <div class="row"><button class="btn danger" id="chatClear">Clear the year chat</button></div>
+      </div>
+
+      <div class="card pane">
+        <h2>Leaderboards</h2>
+        <p class="sub">Wipe the scores for one game or for all of them. Students keep their accounts.</p>
+        <div class="set-grid"><label>Game<select id="lbGame"></select></label></div>
+        <div class="row"><button class="btn danger" id="lbReset">Reset scores</button></div>
+      </div>
+
+      <div class="card pane">
+        <h2>Site name</h2>
+        <div class="set-grid"><label>Name<input class="field" id="adminSiteName" maxlength="30"></label></div>
+        <div class="row"><button class="btn primary" id="adminSiteSave">Save site name</button></div>
+      </div>
     </div>
   </section>
 
@@ -696,7 +750,7 @@ const ICONS = {
   ttt:'<path d="M9 3v18M15 3v18M3 9h18M3 15h18" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4.5 4.5l3 3m0-3l-3 3" stroke="currentColor" stroke-width="1.8"/><circle cx="18" cy="18" r="1.8" '+S2+' stroke-width="1.8"/>'
 };
 const svg=id=>'<svg viewBox="0 0 24 24" aria-hidden="true">'+ICONS[id]+'</svg>';
-const APPS=[["chat","Chat","Talk to the whole year group"],["people","People","Who's online and who's joined"],["homework","Homework","Your homework and due dates"],["quizzes","Quizzes","Play and make quizzes for your year"],["games","Games","Eight games with year leaderboards"],["leaders","Leaderboards","The year's top scores"],["mypin","My PIN","Lock your account with a PIN"],["settings","Settings","Theme, text size and your account"],["admin","Admin","Change anyone's PIN if they forget it"]];
+const APPS=[["chat","Chat","Talk to the whole year group"],["people","People","Who's online and who's joined"],["homework","Homework","Your homework and due dates"],["quizzes","Quizzes","Play and make quizzes for your year"],["games","Games","Eight games with year leaderboards"],["leaders","Leaderboards","The year's top scores"],["mypin","My PIN","Lock your account with a PIN"],["settings","Settings","Theme, text size and your account"],["admin","Admin","Announcements, PINs, muting and more"]];
 const GAMES=[
   {id:"snake",name:"Snake",desc:"Eat, grow, don't crash.",lower:false,unit:""},
   {id:"hopper",name:"Sky Hopper",desc:"Tap to flap through the gaps.",lower:false,unit:""},
@@ -713,7 +767,8 @@ const VIEWS=["start","mypin","settings","admin","home","chat","people","homework
 let db=null, user=null, room=null, assets=null, myId=sess.get("yg-student"), isOwner=false, canWrite=null, dbReady=false, admins=[];
 const isAdmin=id=>!!id&&admins.includes(id);
 const adminActive=()=>loggedIn&&isAdmin(myId)&&!!(profiles[myId]||{}).pinHash;
-let profiles={}, scores={}, peers=[], messages=[];
+let profiles={}, scores={}, peers=[], messages=[], announcement=null, muted=[];
+const isMuted=id=>!!id&&muted.includes(id);
 let loggedIn=false, view="start";
 let pendingView=(()=>{const h=location.hash.slice(1);return VIEWS.includes(h)&&h!=="start"?h:null})();
 
@@ -772,6 +827,7 @@ SCORED.forEach(g=>{const c=el("div","card board");c.append(el("h3",null,g.name+(
 
 /* ---------- home ---------- */
 function renderHome(){
+  renderAnnouncement();
   const now=new Date();
   $("today").textContent=now.toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"});
   const h=now.getHours();const part=h<12?"Good morning":h<18?"Good afternoon":"Good evening";
@@ -965,25 +1021,129 @@ function resetPin(uid){
     btnRow(m,mk("Cancel","",closeModal),go)});
 }
 /* ---------- admin app ---------- */
+const MEGAPHONE='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10v4h3l7 4V6L7 10z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M17.5 9a4 4 0 0 1 0 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+function renderAnnouncement(){
+  const box=$("announceBox");if(!box)return;box.replaceChildren();
+  const a=announcement;if(!a||!a.text){box.hidden=true;return}
+  const ic=el("span","ic");ic.innerHTML=MEGAPHONE;const tx=el("div","tx");
+  tx.append(el("b",null,"Announcement"+(profiles[a.by]?" from "+nickOf(a.by):"")),el("p",null,a.text));
+  box.append(ic,tx);box.hidden=false;
+}
 function renderAdmin(){
   const box=$("adminList");if(!box)return;box.replaceChildren();
   if(!adminActive())return;
+  // overview
+  const today=new Date().toDateString();
+  const st=$("adminStats");st.replaceChildren();
+  [[Object.keys(profiles).length,"Students"],[onlineIds().length,"Online now"],[messages.filter(m=>new Date(m.at).toDateString()===today).length,"Messages today"],[Object.keys(quizzesCount()).length,"Quizzes"]]
+    .forEach(([v,l])=>{const d=el("div");d.append(el("b",null,String(v)),el("span",null,l));st.append(d)});
+  // announcement
+  $("annNow").textContent=announcement&&announcement.text?"Showing now: “"+announcement.text+"”":"No announcement is showing.";
+  $("annRemove").disabled=!(announcement&&announcement.text);
+  // chat
+  $("chatCount").textContent=messages.length?messages.length+(messages.length===1?" message":" messages")+" in the year chat. Clearing deletes them for everyone. Private chats aren't affected.":"The year chat is empty.";
+  $("chatClear").disabled=!messages.length;
+  // leaderboards
+  const sel=$("lbGame");if(!sel.options.length){const o=el("option",null,"All games");o.value="";sel.append(o);SCORED.forEach(g=>{const x=el("option",null,g.name);x.value=g.id;sel.append(x)})}
+  // site name
+  if(document.activeElement!==$("adminSiteName"))$("adminSiteName").value=$("siteName").textContent;
+  // students
   const q=$("adminSearch").value.trim().toLowerCase();
   const ids=Object.keys(profiles).filter(id=>!q||(profiles[id].nick||"").toLowerCase().includes(q)).sort((a,b)=>(profiles[a].nick||"").localeCompare(profiles[b].nick||""));
   if(!ids.length){box.append(el("p","sub",q?"No one matches that name.":"No students yet."));return}
   ids.forEach(id=>{
     const p=profiles[id];const row=el("div","admin-row");row.append(dotFor(p));
-    const who=el("div","who");const nm=el("b",null,p.nick||"Student");if(isAdmin(id))nm.append(el("span","admin-badge","Admin"));
+    const who=el("div","who");const nm=el("b",null,p.nick||"Student");if(isAdmin(id))nm.append(el("span","admin-badge","Admin"));if(isMuted(id))nm.append(el("span","muted-tag","Muted"));
     who.append(nm,el("small",null,(id===myId?"You · ":"")+(p.pinHash?"Has a PIN":"No PIN")));row.append(who);
     const acts=el("div","acts");
-    if(id===myId){const b=el("button","btn small","Use My PIN");b.dataset.open="mypin";acts.append(b)}
+    if(id===myId){const b=el("button","btn small","Use My PIN");b.dataset.open="mypin";acts.append(b);acts.append(mk("Edit name","small",openEditProfile))}
     else{
       acts.append(mk(p.pinHash?"Set new PIN":"Set a PIN","small primary",()=>adminSetPin(id)));
       if(p.pinHash)acts.append(mk("Turn off PIN","small",()=>resetPin(id)));
+      acts.append(mk("Edit name","small",()=>adminEdit(id)));
+      if(!isAdmin(id)){
+        acts.append(mk(isMuted(id)?"Unmute":"Mute","small",()=>setMuted(id,!isMuted(id))));
+        acts.append(mk("Remove","small danger",()=>confirmRemove(id)));
+      }
     }
     row.append(acts);box.append(row);
   });
 }
+function adminEdit(uid){
+  if(!adminActive())return;const p=profiles[uid];if(!p)return;
+  modal("Edit "+(p.nick||"student"),m=>{
+    let colour=p.colour||COLOURS[0];
+    const nl=el("label",null,"Name");const ni=el("input");ni.id="adminEditName";ni.maxLength=20;ni.value=p.nick||"";ni.autocomplete="off";nl.append(ni);
+    const prev=el("div","preview-dot");let dot=dotFor({nick:ni.value,colour});prev.append(dot);
+    const redraw=()=>{const d=dotFor({nick:ni.value||"?",colour});dot.replaceWith(d);dot=d};ni.oninput=redraw;
+    const cl=el("label",null,"Colour");cl.append(colourPicker(colour,c=>{colour=c;redraw()}));
+    const err=el("p","err");err.hidden=true;m.append(nl,cl,prev,err);
+    const go=mk("Save","primary",async()=>{
+      const nick=clean(ni.value.trim().replace(/\s+/g," "));
+      if(nick.length<2){err.textContent="Names need at least 2 letters.";err.hidden=false;return}
+      if(Object.entries(profiles).some(([id,x])=>id!==uid&&x.nick&&x.nick.toLowerCase()===nick.toLowerCase())){err.textContent="Someone already has that name.";err.hidden=false;return}
+      go.disabled=true;
+      try{const d=Object.assign({},profiles[uid],{nick,colour});await db.doc("profiles/"+uid).set(d);profiles[uid]=d;closeModal();renderAdmin();toast("Saved")}
+      catch(e){go.disabled=false;err.textContent="Couldn't save. Try again.";err.hidden=false}
+    });
+    btnRow(m,mk("Cancel","",closeModal),go);
+  });
+}
+async function setMuted(uid,on){
+  if(!adminActive())return;
+  const next=on?[...new Set([...muted,uid])]:muted.filter(x=>x!==uid);
+  try{await db.doc("moderation/state").set({muted:next,by:myId,at:Date.now()});muted=next;renderAdmin();renderChatHead();toast(on?nickOf(uid)+" can't post in the year chat now":nickOf(uid)+" can post in the year chat again")}
+  catch(e){toast("Couldn't change that. Try again.")}
+}
+$("annPost").onclick=async()=>{
+  if(!adminActive())return;const text=clean($("annText").value.trim()).slice(0,200);
+  if(!text){toast("Write the announcement first");$("annText").focus();return}
+  $("annPost").disabled=true;
+  try{announcement={text,by:myId,at:Date.now()};await db.doc("announce/current").set(announcement);$("annText").value="";renderAnnouncement();renderAdmin();toast("Announcement posted")}
+  catch(e){toast("Couldn't post. Try again.")}
+  $("annPost").disabled=false;
+};
+$("annRemove").onclick=async()=>{
+  if(!adminActive())return;
+  try{await db.doc("announce/current").delete();announcement=null;renderAnnouncement();renderAdmin();toast("Announcement removed")}catch(e){toast("Couldn't remove. Try again.")}
+};
+$("chatClear").onclick=()=>{
+  if(!adminActive())return;
+  modal("Clear the year chat?",m=>{
+    m.append(el("p",null,"This deletes every message in the year chat for everyone. It can't be undone. Private chats aren't affected."));
+    const go=mk("Clear the chat","danger solid",async()=>{
+      go.disabled=true;go.textContent="Clearing…";
+      try{const all=await db.collection("chat").get();for(const d of all.docs)await db.doc("chat/"+d.id).delete();closeModal();toast("Year chat cleared")}
+      catch(e){go.disabled=false;go.textContent="Clear the chat";toast("Couldn't clear everything. Try again.")}
+    });
+    btnRow(m,mk("Cancel","",closeModal),go);
+  });
+};
+$("lbReset").onclick=()=>{
+  if(!adminActive())return;
+  const gid=$("lbGame").value;const g=gid?gameOf(gid):null;
+  modal(g?"Reset "+g.name+" scores?":"Reset all scores?",m=>{
+    m.append(el("p",null,(g?"Everyone's "+g.name+" scores":"Everyone's scores in every game")+" will be wiped. This can't be undone."));
+    const go=mk("Reset scores","danger solid",async()=>{
+      go.disabled=true;
+      try{
+        const all=await db.collection("scores").get();
+        for(const d of all.docs){
+          if(!g){await db.doc("scores/"+d.id).delete();continue}
+          const v=d.data()||{};if(!(gid in v))continue;
+          const n=Object.assign({},v);delete n[gid];
+          if(Object.keys(n).filter(k=>k!=="at").length)await db.doc("scores/"+d.id).set(n);else await db.doc("scores/"+d.id).delete();
+        }
+        closeModal();toast(g?g.name+" scores reset":"All scores reset");
+      }catch(e){go.disabled=false;toast("Couldn't reset. Try again.")}
+    });
+    btnRow(m,mk("Cancel","",closeModal),go);
+  });
+};
+$("adminSiteSave").onclick=async()=>{
+  if(!adminActive())return;const v=$("adminSiteName").value.trim();if(!v){toast("Type a name first");return}
+  try{await db.doc("config/site").set({name:v});toast("Site renamed")}catch(e){toast("Couldn't rename. Try again.")}
+};
 $("adminSearch").addEventListener("input",renderAdmin);
 function adminSetPin(uid){
   if(!adminActive())return;
@@ -1146,7 +1306,7 @@ function renderRequests(){
 function renderChatHead(){
   const t=curThread(),bar=$("dmBar");bar.replaceChildren();
   if(activeConv!=="year"&&!t){activeConv="year"}
-  if(!t){$("chatTitle").textContent="Year chat";$("chatSub").textContent="One room for the whole year. Be kind. Messages are limited to 300 characters.";bar.hidden=true;setComposer(true,"Write a message…");return}
+  if(!t){$("chatTitle").textContent="Year chat";$("chatSub").textContent="One room for the whole year. Be kind. Messages are limited to 300 characters.";bar.hidden=true;setComposer(!isMuted(myId),isMuted(myId)?"An admin has muted you in the year chat":"Write a message…");return}
   const o=otherOf(t),n=nickOf(o);
   $("chatTitle").textContent="Chat with "+n;
   $("chatSub").textContent="A private chat. Only you and "+n+" see it on this site.";
@@ -1272,6 +1432,7 @@ let lastSend=0;
 $("composer").addEventListener("submit",async e=>{
   e.preventDefault();if(!loggedIn||!db)return;
   const t=curThread();if(t&&t.status!=="accepted")return;
+  if(!t&&isMuted(myId)){toast("An admin has muted you in the year chat");return}
   const txt=clean($("msgInput").value.trim()).slice(0,300);if(!txt)return;
   if(Date.now()-lastSend<1500){toast("Slow down a bit");return}
   lastSend=Date.now();$("msgInput").value="";
@@ -1892,11 +2053,13 @@ async function connect(){
   if(!db){dbReady=true;renderAccount();return}
   if(db){
     db.collection("profiles").onSnapshot(s=>{const p={};s.docs.forEach(d=>p[d.id]=d.data());profiles=p;dbReady=true;renderAccount()},()=>{dbReady=true;renderAccount()});
-    db.collection("chat").orderBy("at","desc").limit(100).onSnapshot(s=>{messages=s.docs.map(d=>Object.assign({id:d.id},d.data())).reverse();checkNewMessages();renderChat();renderHome()},()=>{});
+    db.collection("chat").orderBy("at","desc").limit(100).onSnapshot(s=>{messages=s.docs.map(d=>Object.assign({id:d.id},d.data())).reverse();checkNewMessages();renderChat();renderHome();if(view==="admin")renderAdmin()},()=>{});
     db.collection("dms").onSnapshot(s=>{const p={};s.docs.forEach(d=>p[d.id]=d.data());dms=p;dmsLoaded=true;onDmsChange(false)},()=>{});
     db.collection("scores").onSnapshot(s=>{const p={};s.docs.forEach(d=>p[d.id]=d.data());scores=p;renderBoards()},()=>{});
     db.collection("quizzes").onSnapshot(s=>{const p={};s.docs.forEach(d=>{const v=d.data();if(v&&Array.isArray(v.questions)&&v.questions.length)p[d.id]=v});quiz.setQuizzes(p)},()=>{});
     db.collection("quizres").onSnapshot(s=>{const p={};s.docs.forEach(d=>p[d.id]=d.data());quiz.setResults(p)},()=>{});
+    db.doc("announce/current").onSnapshot(sn=>{announcement=sn.exists?sn.data():null;renderAnnouncement();if(view==="admin")renderAdmin()},()=>{});
+    db.doc("moderation/state").onSnapshot(sn=>{muted=(sn.exists&&Array.isArray(sn.data().muted))?sn.data().muted:[];renderChatHead();if(view==="admin")renderAdmin()},()=>{});
     db.doc("config/admins").onSnapshot(s=>{admins=(s.exists&&Array.isArray(s.data().ids))?s.data().ids:[];renderPeople();renderHome();renderChat();quiz.refresh();renderApps();if(view==="settings")renderSettings();if(view==="admin"){if(adminActive())renderAdmin();else open("home")}},()=>{});
     db.doc("config/site").onSnapshot(s=>{const n=(s.exists&&s.data().name)||"Our Year Group";$("siteName").textContent=n;$("crest").textContent=initials(n);renderHome()},()=>{});
   }
