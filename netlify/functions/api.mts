@@ -228,7 +228,7 @@ async function rpc(req: Request) {
     }
     case "emit": {
       const peer = typeof b.peer === "string" && SEG.test(b.peer) ? b.peer : null;
-      if (!peer || b.topic !== "wave") return fail(400, "invalid_argument", "Bad event.");
+      if (!peer || !["wave", "typing"].includes(b.topic)) return fail(400, "invalid_argument", "Bad event.");
       const data = JSON.stringify(b.data ?? null); if (data.length > 2000) return fail(400, "invalid_argument", "Event too big.");
       await s.setJSON(`evt/${pad(Date.now())}~${rand()}`, { topic: b.topic, data: b.data ?? null, peer, t: Date.now() });
       return json({ ok: true });

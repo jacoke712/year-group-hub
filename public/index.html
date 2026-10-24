@@ -153,6 +153,54 @@ main{padding-block:24px 32px}
 .pick:disabled{opacity:.6;cursor:default}
 .pick:not(:disabled):hover{border-color:var(--gold)}
 
+/* reactions, replies, typing */
+.msg-acts{display:flex;gap:10px}
+.reacts{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.react-chip{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:1px 8px;font-size:.85rem;font-weight:700;color:var(--ink)}
+.react-chip.mine{border-color:var(--gold);background:var(--gold-soft)}
+.react-chip b{font-family:var(--font-mono);font-size:.75rem;font-variant-numeric:tabular-nums}
+.react-pick{display:flex;gap:4px;margin-top:6px;padding:4px;border:1px solid var(--line);border-radius:999px;background:var(--surface);width:max-content;max-width:100%}
+.react-pick button{border:0;background:none;font-size:1.25rem;line-height:1;padding:4px 6px;border-radius:999px}
+.react-pick button:hover,.react-pick button:focus-visible{background:var(--surface-2)}
+.quote{display:block;width:100%;text-align:left;border:0;border-left:3px solid var(--gold);background:color-mix(in srgb,var(--gold) 10%,transparent);border-radius:6px;padding:4px 8px;margin:4px 0 2px;font-size:.8rem;color:var(--muted)}
+.quote b{display:block;color:var(--ink);font-size:.78rem}
+.quote span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:240px}
+.msg.flash .bubble{outline:3px solid var(--gold);outline-offset:2px}
+.reply-bar{display:flex;align-items:center;gap:10px;padding:6px 10px;margin-bottom:8px;border-left:3px solid var(--gold);background:var(--surface-2);border-radius:8px}
+.reply-bar .tx{flex:1;min-width:0;font-size:.85rem}
+.reply-bar .tx b{display:block}
+.reply-bar .tx span{display:block;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.reply-bar .x{border:0;background:none;font-size:1.3rem;line-height:1;color:var(--muted);padding:2px 8px}
+.typing{min-height:1.4em;font-size:.8rem;color:var(--muted);font-style:italic;padding:0 4px 6px}
+
+/* live games */
+.vs-wrap{display:flex;flex-direction:column;gap:14px;max-width:760px}
+.vs-wrap .pane{display:flex;flex-direction:column;gap:10px}
+.vs-wrap h2{margin:0;font-size:1.05rem}
+.vs-types{display:flex;gap:8px;flex-wrap:wrap}
+.vs-types button{border:1.5px solid var(--line);background:var(--surface-2);border-radius:999px;padding:6px 14px;font-weight:800}
+.vs-types button[aria-pressed="true"]{background:var(--band);color:var(--band-ink);border-color:var(--band)}
+.vs-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--surface-2)}
+.vs-row .who{flex:1;min-width:140px}
+.vs-row .who b{display:block;overflow-wrap:anywhere}
+.vs-row .who small{color:var(--muted)}
+.vs-row.hot{border-color:var(--gold);background:var(--gold-soft)}
+.vs-board{display:flex;flex-direction:column;align-items:center;gap:14px;padding:20px}
+.vs-players{display:flex;gap:14px;align-items:center;justify-content:center;flex-wrap:wrap;font-weight:800}
+.vs-players .pl{display:flex;align-items:center;gap:8px;padding:4px 10px 4px 4px;border-radius:999px;border:2px solid transparent}
+.vs-players .pl.turn{border-color:var(--gold);background:var(--gold-soft)}
+.vs-players .chipc{width:18px;height:18px;border-radius:50%;display:inline-block}
+.vs-status{margin:0;font-weight:800;text-align:center}
+.c4{display:grid;grid-template-columns:repeat(7,min(44px,11vw));gap:6px;padding:10px;border-radius:14px;background:var(--band)}
+.c4 button{aspect-ratio:1;border-radius:50%;border:0;background:var(--surface-2);padding:0}
+.c4 button.p1{background:var(--gold)}
+.c4 button.p2{background:var(--bad)}
+.c4 button.win{box-shadow:0 0 0 3px var(--surface),0 0 0 6px var(--good)}
+.c4 button:disabled{cursor:default}
+.ttt button.win{border-color:var(--good);box-shadow:0 0 0 3px color-mix(in srgb,var(--good) 40%,transparent)}
+.gcard{position:relative}
+.gcard .badge{position:absolute;top:12px;right:12px}
+
 /* chat attachments */
 .attach-btn{width:44px;height:44px;flex:none;border-radius:50%;border:1.5px solid var(--line);background:var(--surface-2);display:grid;place-items:center;color:var(--ink);padding:0}
 .attach-btn svg{width:20px;height:20px}
@@ -532,6 +580,8 @@ canvas{width:100%;height:auto;border-radius:10px;touch-action:none;display:block
     <div class="card pane chat">
       <div class="dm-bar" id="dmBar" hidden></div>
       <div class="msgs" id="msgs"></div>
+      <div class="typing" id="typingLine" aria-live="polite"></div>
+      <div class="reply-bar" id="replyBar" hidden></div>
       <div class="attach-preview" id="attachPreview" hidden></div>
       <form class="composer" id="composer">
         <button type="button" class="attach-btn" id="attachBtn" aria-label="Attach a photo or file" title="Attach a photo or file" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11.5l-7.8 7.8a5 5 0 0 1-7.1-7.1l8.5-8.5a3.3 3.3 0 0 1 4.7 4.7l-8.4 8.4a1.7 1.7 0 0 1-2.4-2.4l7.7-7.7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
@@ -690,6 +740,24 @@ canvas{width:100%;height:auto;border-radius:10px;touch-action:none;display:block
       </div>
       <aside class="card board"><h3>Fastest reactions</h3><ol data-board="reaction"></ol></aside>
     </div>
+  </section>
+
+  <!-- PLAY A CLASSMATE -->
+  <section id="view-versus" hidden>
+    <div class="view-head"><button class="back" data-open="games">← Games</button><h1>Play a classmate</h1><p>Challenge someone to noughts &amp; crosses or Connect 4. Take turns live. Each win goes on the leaderboard.</p></div>
+    <div class="vs-wrap" id="vsLobby">
+      <div id="vsInvites"></div>
+      <div class="card pane">
+        <h2>Your games</h2>
+        <div class="admin-list" id="vsGames" style="margin-top:0"></div>
+      </div>
+      <div class="card pane">
+        <h2>Challenge someone</h2>
+        <div class="vs-types" id="vsTypes"><button type="button" data-type="ttt" aria-pressed="true">Noughts &amp; crosses</button><button type="button" data-type="c4" aria-pressed="false">Connect 4</button></div>
+        <div class="admin-list" id="vsPeople" style="margin-top:0"></div>
+      </div>
+    </div>
+    <div class="card vs-board" id="vsBoard" hidden></div>
   </section>
 
   <!-- TTT -->
@@ -854,6 +922,7 @@ const ICONS = {
   memory:'<rect x="3" y="5" width="10" height="14" rx="2" '+S2+'/><rect x="11" y="3" width="10" height="14" rx="2" fill="currentColor" stroke="currentColor" stroke-width="2"/>',
   word:'<rect x="2.5" y="8" width="5.5" height="8" rx="1.2" fill="currentColor"/><rect x="9.25" y="8" width="5.5" height="8" rx="1.2" '+S2+' stroke-width="1.6"/><rect x="16" y="8" width="5.5" height="8" rx="1.2" fill="currentColor" opacity=".55"/>',
   reaction:'<path d="M13 3 5 13h6l-1 8 8-10h-6z" '+S2+' stroke-linejoin="round"/>',
+  versus:'<circle cx="7" cy="8" r="3" '+S2+'/><circle cx="17" cy="8" r="3" '+S2+'/><path d="M2 20c.5-3.5 2.5-5 5-5s4.5 1.5 5 5M12 20c.5-3.5 2.5-5 5-5s4.5 1.5 5 5" '+S2+' stroke-linecap="round"/>',
   ttt:'<path d="M9 3v18M15 3v18M3 9h18M3 15h18" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4.5 4.5l3 3m0-3l-3 3" stroke="currentColor" stroke-width="1.8"/><circle cx="18" cy="18" r="1.8" '+S2+' stroke-width="1.8"/>'
 };
 const svg=id=>'<svg viewBox="0 0 24 24" aria-hidden="true">'+ICONS[id]+'</svg>';
@@ -866,6 +935,7 @@ const GAMES=[
   {id:"word",name:"Word Guess",desc:"Guess the word of the day in 6 tries.",lower:false,unit:" solved"},
   {id:"memory",name:"Memory Match",desc:"Find all 8 pairs in the fewest moves.",lower:true,unit:" moves"},
   {id:"reaction",name:"Reaction Test",desc:"Tap the moment it turns green.",lower:true,unit:" ms"},
+  {id:"versus",name:"Play a classmate",desc:"Noughts & crosses or Connect 4, live.",lower:false,unit:" wins"},
   {id:"ttt",name:"Noughts & Crosses",desc:"Three in a row beats the computer.",scored:false}
 ];
 const SCORED=GAMES.filter(g=>g.scored!==false);
@@ -874,7 +944,7 @@ const VIEWS=["start","mypin","settings","admin","polls","birthdays","home","chat
 let db=null, user=null, room=null, assets=null, myId=sess.get("yg-student"), isOwner=false, canWrite=null, dbReady=false, admins=[];
 const isAdmin=id=>!!id&&admins.includes(id);
 const adminActive=()=>loggedIn&&isAdmin(myId)&&!!(profiles[myId]||{}).pinHash;
-let profiles={}, scores={}, peers=[], messages=[], announcement=null, muted=[], polls={}, pollVotes={}, countdowns={};
+let profiles={}, scores={}, peers=[], messages=[], announcement=null, muted=[], polls={}, pollVotes={}, countdowns={}, reactions={}, vsGames={};
 const isMuted=id=>!!id&&muted.includes(id);
 let loggedIn=false, view="start";
 let pendingView=(()=>{const h=location.hash.slice(1);return VIEWS.includes(h)&&h!=="start"?h:null})();
@@ -911,6 +981,7 @@ function open(v){
   if(v==="mypin")renderPin();
   if(v==="settings")renderSettings();
   if(v==="polls")renderPolls();
+  if(v==="versus"){vsActive=null;renderVersus()}
   if(v==="birthdays")renderBirthdays(true);
   if(v==="admin"){$("adminSearch").value="";renderAdmin()}
   window.scrollTo(0,0);
@@ -921,6 +992,7 @@ $("brandBtn").onclick=()=>open("home");
 function renderApps(){
   const hidden=prefs().hide||[];$("apps").replaceChildren();
   APPS.forEach(([id,name,desc])=>{if(id==="admin"&&!adminActive())return;if(id!=="settings"&&hidden.includes(id))return;const b=el("button","app");b.dataset.open=id;const ic=el("span","ic");ic.innerHTML=svg(id);b.append(ic,el("b",null,name),el("small",null,desc));
+    if(id==="games"&&loggedIn){const n=vsBadgeCount();if(n){const bd=el("span","badge",String(n));bd.setAttribute("aria-label",n+" waiting");b.append(bd)}}
     if(id==="chat"&&loggedIn){const n=chatBadgeCount();if(n){const bd=el("span","badge",String(n));bd.setAttribute("aria-label",n+" new");b.append(bd)}}
     $("apps").append(b)});
 }
@@ -973,6 +1045,7 @@ function renderAccount(){
   else if(!loggedIn&&view!=="start")open("start");
   renderStart();hwSync();dmSync();renderPeople();renderChat();renderHome();renderBoards();quiz.refresh();
   if(view==="birthdays")renderBirthdays(false);if(view==="polls")renderPolls();
+  for(const k in vsSeen)delete vsSeen[k];vsMine().forEach(g=>vsSeen[g.id]=g.status+"|"+g.turn+"|"+(g.moves||0));renderVersus();
   if(view==="admin"){if(adminActive())renderAdmin();else open("home")}
 }
 function closeModal(){$("overlay").hidden=true;$("modal").replaceChildren();$("modal").onkeydown=null}
@@ -1584,6 +1657,7 @@ function renderChatHead(){
 }
 function setComposer(on,ph){const can=on&&loggedIn&&db&&canWrite!==false;$("msgInput").disabled=!can;$("sendBtn").disabled=!can;$("attachBtn").disabled=!can||!assets;if(!can)clearAttach();$("msgInput").placeholder=canWrite===false?"Your access is view-only":ph}
 function setConv(id){
+  if(activeConv!==id){clearReply();reactPickFor=null}
   activeConv=id;
   const want=id==="year"?null:id;
   if(want!==dmMsgFor){if(dmMsgUnsub){dmMsgUnsub();dmMsgUnsub=null}dmMsgs=[];dmMsgFor=want;
@@ -1681,15 +1755,199 @@ function renderChat(){
     else if(t.status==="pending")e.append(el("strong",null,"Waiting for "+nickOf(otherOf(t))),document.createTextNode("Your request has been sent. You can chat once they accept."));
     else e.append(el("strong",null,"Request declined"),document.createTextNode("You can't message "+nickOf(otherOf(t))+"."));
     box.append(e);box.dataset.init="";return}
+  const canPost=loggedIn&&db&&canWrite!==false&&(t?t.status==="accepted":!isMuted(myId));
   list.forEach(m=>{
-    const mine=m.by===myId;const row=el("div","msg"+(mine?" mine":""));
+    const mine=m.by===myId;const row=el("div","msg"+(mine?" mine":""));row.dataset.mid=m.id;
     row.append(dotFor(profiles[m.by]));
+    const key=msgKey(t,m);
     const b=el("div","bubble");const meta=el("div","meta");meta.append(el("b",null,mine?"You":nickOf(m.by)),el("span",null,fmtTime(m.at)));
-    if(loggedIn&&(mine||(adminActive()&&!t))){const d=el("button","link","Delete");d.onclick=()=>(t?db.doc("dms/"+t.id).collection("msgs").doc(m.id):db.doc("chat/"+m.id)).delete().then(()=>dropAtt(m)).catch(()=>toast("Couldn't delete"));meta.append(d)}
-    b.append(meta);if(m.text)b.append(el("div","text",m.text));if(m.att)b.append(attView(m.att,m.by));row.append(b);box.append(row);
+    const acts=el("span","msg-acts");
+    if(canPost){const r=el("button","link","Reply");r.onclick=()=>startReply(m);acts.append(r);
+      const rc=el("button","link","React");rc.setAttribute("aria-expanded",String(reactPickFor===key));rc.onclick=()=>{reactPickFor=reactPickFor===key?null:key;renderChat()};acts.append(rc)}
+    if(loggedIn&&(mine||(adminActive()&&!t))){const d=el("button","link","Delete");d.onclick=()=>(t?db.doc("dms/"+t.id).collection("msgs").doc(m.id):db.doc("chat/"+m.id)).delete().then(()=>{dropAtt(m);dropReactions(key)}).catch(()=>toast("Couldn't delete"));acts.append(d)}
+    meta.append(acts);b.append(meta);
+    if(m.re&&m.re.id){const q=el("button","quote");q.type="button";q.append(el("b",null,m.re.by===myId?"You":nickOf(m.re.by)),el("span",null,m.re.text||"Message"));q.onclick=()=>jumpTo(m.re.id);b.append(q)}
+    if(m.text)b.append(el("div","text",m.text));if(m.att)b.append(attView(m.att,m.by));
+    const rs=reactionsFor(key);const names=Object.keys(rs);
+    if(names.length){const rr=el("div","reacts");REACTS.filter(e=>rs[e]).forEach(e=>{const ids=rs[e];const c=el("button","react-chip"+(ids.includes(myId)?" mine":""));c.type="button";c.append(document.createTextNode(e),el("b",null,String(ids.length)));
+      c.title=ids.map(i=>i===myId?"You":nickOf(i)).join(", ");c.setAttribute("aria-label",e+" from "+c.title);c.disabled=!canPost;c.onclick=()=>toggleReact(key,e);rr.append(c)});b.append(rr)}
+    if(reactPickFor===key&&canPost){const pk=el("div","react-pick");REACTS.forEach(e=>{const x=el("button",null,e);x.type="button";x.setAttribute("aria-label","React with "+e);x.onclick=()=>{reactPickFor=null;toggleReact(key,e)};pk.append(x)});b.append(pk)}
+    row.append(b);box.append(row);
   });
   if(atBottom||!box.dataset.init){box.scrollTop=box.scrollHeight;box.dataset.init="1"}
 }
+/* ---------- reactions, replies, typing ---------- */
+const REACTS=["👍","❤️","😂","😮","😢"];
+let reactPickFor=null,replyTo=null,lastTypingSent=0;const typingMap={};
+const msgKey=(t,m)=>t?"d:"+t.id+":"+m.id:"c:"+m.id;
+function reactionsFor(key){const out={};Object.values(reactions).forEach(r=>{if(r&&r.msg===key&&REACTS.includes(r.e)&&profiles[r.by])(out[r.e]=out[r.e]||[]).push(r.by)});return out}
+async function toggleReact(key,e){
+  if(!db||canWrite===false){toast("Your access is view-only");return}
+  const rid=key+"~"+myId;const cur=reactions[rid];
+  try{
+    if(cur&&cur.e===e){await db.doc("reactions/"+rid).delete();delete reactions[rid]}
+    else{const r={msg:key,e,by:myId,at:Date.now()};await db.doc("reactions/"+rid).set(r);reactions[rid]=r}
+    renderChat();
+  }catch(err){toast("Couldn't add that reaction. Try again.")}
+}
+function dropReactions(key){Object.entries(reactions).forEach(([rid,r])=>{if(r&&r.msg===key){db.doc("reactions/"+rid).delete().catch(()=>{});delete reactions[rid]}})}
+function startReply(m){
+  replyTo={conv:activeConv,id:m.id,by:m.by,text:(m.text||attLabel(m.att)||"Message").slice(0,80)};
+  const bar=$("replyBar");bar.replaceChildren();const tx=el("div","tx");tx.append(el("b",null,"Replying to "+(m.by===myId?"yourself":nickOf(m.by))),el("span",null,replyTo.text));
+  const x=el("button","x","×");x.type="button";x.setAttribute("aria-label","Cancel reply");x.onclick=clearReply;bar.append(tx,x);bar.hidden=false;$("msgInput").focus();
+}
+function clearReply(){replyTo=null;const bar=$("replyBar");if(bar){bar.hidden=true;bar.replaceChildren()}}
+function jumpTo(id){const row=[...document.querySelectorAll("#msgs .msg")].find(r=>r.dataset.mid===id);if(!row){toast("That message isn't here any more");return}
+  row.scrollIntoView({block:"center",behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"});row.classList.add("flash");setTimeout(()=>row.classList.remove("flash"),1600)}
+$("msgInput").addEventListener("input",()=>{
+  if(!room||!loggedIn||!$("msgInput").value.trim())return;
+  const now=Date.now();if(now-lastTypingSent<3500)return;lastTypingSent=now;
+  room.emit("typing",{conv:activeConv,from:myId}).catch(()=>{});
+});
+function onTyping(msg){
+  const d=msg&&msg.data;if(!d||!loggedIn||d.from===myId||typeof d.conv!=="string")return;
+  if(d.conv!=="year"&&!myThreads().some(t=>t.id===d.conv&&t.status==="accepted"))return;
+  (typingMap[d.conv]=typingMap[d.conv]||{})[d.from]=Date.now();renderTyping();
+}
+function renderTyping(){
+  const line=$("typingLine");if(!line)return;const now=Date.now();const m=typingMap[activeConv]||{};
+  const who=Object.keys(m).filter(id=>now-m[id]<9000&&profiles[id]).map(nickOf);
+  line.textContent=!who.length?"":who.length===1?who[0]+" is typing…":who.length===2?who[0]+" and "+who[1]+" are typing…":"Several people are typing…";
+}
+setInterval(()=>{if(view==="chat")renderTyping()},1000);
+document.addEventListener("click",e=>{if(reactPickFor&&!e.target.closest(".react-pick")&&!e.target.closest(".msg-acts")){reactPickFor=null;if(view==="chat")renderChat()}});
+
+/* ---------- play a classmate ---------- */
+let vsType="ttt",vsActive=null;const vsSeen={};let vsLoaded=false;
+const VS_NAMES={ttt:"noughts & crosses",c4:"Connect 4"};
+const vsMine=()=>Object.entries(vsGames).filter(([id,g])=>g&&(g.p1===myId||g.p2===myId)&&profiles[g.p1]&&profiles[g.p2]).map(([id,g])=>Object.assign({id},g));
+const vsOther=g=>g.p1===myId?g.p2:g.p1;
+const vsMyNum=g=>g.p1===myId?1:2;
+function vsBadgeCount(){if(!loggedIn)return 0;return vsMine().filter(g=>(g.status==="invited"&&g.to===myId)||(g.status==="playing"&&g.turn===vsMyNum(g))).length}
+function vsWinner(type,b){
+  if(type==="ttt"){for(const L of [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]])if(b[L[0]]&&b[L[0]]===b[L[1]]&&b[L[0]]===b[L[2]])return{w:b[L[0]],line:L};return b.every(Boolean)?{w:"draw",line:[]}:null}
+  const at=(r,c)=>r>=0&&r<6&&c>=0&&c<7?b[r*7+c]:null;
+  for(let r=0;r<6;r++)for(let c=0;c<7;c++){const v=at(r,c);if(!v)continue;
+    for(const [dr,dc] of [[0,1],[1,0],[1,1],[1,-1]]){const line=[r*7+c];for(let k=1;k<4;k++){if(at(r+dr*k,c+dc*k)!==v)break;line.push((r+dr*k)*7+c+dc*k)}if(line.length===4)return{w:v,line}}}
+  return b.every(Boolean)?{w:"draw",line:[]}:null;
+}
+async function vsChallenge(other,type,firstIsOther){
+  if(!db||canWrite===false){toast("Your access is view-only");return}
+  const open=vsMine().find(g=>vsOther(g)===other&&(g.status==="invited"||g.status==="playing"));
+  if(open){vsActive=open.id;renderVersus();if(open.status==="invited"&&open.p2===myId)toast(nickOf(other)+" already challenged you. Accept it below.");return}
+  const p1=firstIsOther?other:myId,p2=firstIsOther?myId:other;
+  const g={type,p1,p2,from:myId,to:other,status:"invited",board:Array(type==="ttt"?9:42).fill(""),turn:1,winner:"",line:[],moves:0,created:Date.now(),updated:Date.now()};
+  try{const ref=db.collection("versus").doc();await ref.set(g);vsGames[ref.id]=g;vsActive=ref.id;renderVersus();toast("Challenge sent to "+nickOf(other))}
+  catch(e){toast("Couldn't send the challenge. Try again.")}
+}
+async function vsWrite(id,patch){const g=Object.assign({},vsGames[id],patch,{updated:Date.now()});await db.doc("versus/"+id).set(g);vsGames[id]=g;return g}
+async function vsRespond(id,yes){
+  try{if(yes){await vsWrite(id,{status:"playing"});vsActive=id}else{await db.doc("versus/"+id).delete();delete vsGames[id];toast("Challenge declined")}renderVersus();renderApps()}
+  catch(e){toast("Couldn't do that. Try again.")}
+}
+async function vsMove(id,cell){
+  const g=vsGames[id];if(!g||g.status!=="playing"||g.turn!==vsMyNum(g))return;
+  const b=g.board.slice();const me=String(vsMyNum(g));
+  if(g.type==="ttt"){if(b[cell])return;b[cell]=me}
+  else{const col=cell%7;let r=5;while(r>=0&&b[r*7+col])r--;if(r<0)return;b[r*7+col]=me}
+  const res=vsWinner(g.type,b);
+  try{await vsWrite(id,{board:b,turn:g.turn===1?2:1,moves:(g.moves||0)+1,status:res?"done":"playing",winner:res?res.w:"",line:res?res.line:[]});renderVersus();vsCredit()}
+  catch(e){toast("Couldn't make that move. Try again.")}
+}
+async function vsGiveUp(id){
+  const g=vsGames[id];if(!g)return;
+  modal("Give up?",m=>{m.append(el("p",null,nickOf(vsOther(g))+" will get the win."));
+    const go=mk("Give up","danger solid",async()=>{go.disabled=true;try{await vsWrite(id,{status:"done",winner:String(vsMyNum(g)===1?2:1),gaveUp:myId,line:[]});closeModal();renderVersus()}catch(e){go.disabled=false;toast("Couldn't do that")}});
+    btnRow(m,mk("Keep playing","",closeModal),go)});
+}
+async function vsRemove(id){try{await db.doc("versus/"+id).delete();delete vsGames[id];if(vsActive===id)vsActive=null;renderVersus();renderApps()}catch(e){toast("Couldn't remove that game")}}
+const vsCredited=new Set();
+async function vsCredit(){
+  // the winner's own device adds the win to their score, once per game
+  for(const g of vsMine()){
+    if(g.status==="done"&&g.winner===String(vsMyNum(g))&&!g.credited&&!vsCredited.has(g.id)){
+      vsCredited.add(g.id);
+      try{await vsWrite(g.id,{credited:true});saveScore("versus",(myBest("versus")||0)+1)}catch(e){vsCredited.delete(g.id)}
+    }
+  }
+}
+function vsNotify(prevLoaded){
+  if(!loggedIn)return;
+  vsMine().forEach(g=>{
+    const key=g.status+"|"+g.turn+"|"+(g.moves||0);const was=vsSeen[g.id];vsSeen[g.id]=key;
+    if(!prevLoaded||was===key)return;
+    const viewing=view==="versus"&&vsActive===g.id;
+    if(g.status==="invited"&&g.to===myId&&!was){toast(nickOf(g.from||vsOther(g))+" challenged you to "+VS_NAMES[g.type]+"!");if(prefs().sound)beep()}
+    else if(g.status==="playing"&&g.turn===vsMyNum(g)&&!viewing){toast("Your move against "+nickOf(vsOther(g)));if(prefs().sound)beep()}
+    else if(g.status==="done"&&was&&!was.startsWith("done")&&!viewing){toast(g.winner==="draw"?"Your game with "+nickOf(vsOther(g))+" was a draw":g.winner===String(vsMyNum(g))?"You beat "+nickOf(vsOther(g))+"!":nickOf(vsOther(g))+" won your game")}
+  });
+}
+function vsStatusText(g){
+  const other=nickOf(vsOther(g));
+  if(g.status==="invited")return g.to===myId?other+" challenged you":"Waiting for "+other+" to accept";
+  if(g.status==="playing")return g.turn===vsMyNum(g)?"Your move":other+"'s move";
+  if(g.winner==="draw")return"It's a draw";
+  const won=g.winner===String(vsMyNum(g));
+  return g.gaveUp?(g.gaveUp===myId?"You gave up":other+" gave up. You win!"):won?"You win!":other+" wins";
+}
+function renderVersus(){
+  if(!$("vsLobby"))return;
+  document.querySelectorAll('#gamesGrid .gcard[data-open="versus"] .badge').forEach(x=>x.remove());
+  const n=vsBadgeCount();const card=document.querySelector('#gamesGrid .gcard[data-open="versus"]');if(card&&n){const bd=el("span","badge",String(n));card.append(bd)}
+  if(view!=="versus")return;
+  const active=vsActive&&vsGames[vsActive]?Object.assign({id:vsActive},vsGames[vsActive]):null;
+  $("vsLobby").hidden=!!(active&&active.status!=="invited");$("vsBoard").hidden=!(active&&active.status!=="invited");
+  if(active&&active.status!=="invited"){renderVsBoard(active);return}
+  const mine=vsMine();
+  // invites to me
+  const inv=$("vsInvites");inv.replaceChildren();
+  mine.filter(g=>g.status==="invited"&&g.from!==myId).forEach(g=>{const r=el("div","dm-req");r.append(dotFor(profiles[vsOther(g)]));
+    const tx=el("div","tx",nickOf(vsOther(g))+" challenged you to "+VS_NAMES[g.type]);tx.append(el("small",null,(g.p1===myId?"You'd go first.":nickOf(g.p1)+" would go first.")));
+    r.append(tx,mk("Decline","small",()=>vsRespond(g.id,false)),mk("Play","primary small",()=>vsRespond(g.id,true)));inv.append(r)});
+  // my games
+  const box=$("vsGames");box.replaceChildren();
+  const list=mine.filter(g=>!(g.status==="invited"&&g.from!==myId)).sort((a,b)=>(b.updated||0)-(a.updated||0));
+  if(!list.length)box.append(el("p","sub","No games yet. Challenge someone below."));
+  list.forEach(g=>{const hot=g.status==="playing"&&g.turn===vsMyNum(g);const r=el("div","vs-row"+(hot?" hot":""));r.append(dotFor(profiles[vsOther(g)]));
+    const w=el("div","who");w.append(el("b",null,VS_NAMES[g.type].replace(/^./,c=>c.toUpperCase())+" with "+nickOf(vsOther(g))),el("small",null,vsStatusText(g)));r.append(w);
+    const a=el("div","acts");
+    if(g.status==="invited")a.append(mk("Cancel","small",()=>vsRemove(g.id)));
+    else{a.append(mk(g.status==="playing"?(hot?"Play":"Watch"):"View","small"+(hot?" primary":""),()=>{vsActive=g.id;renderVersus()}));if(g.status==="done")a.append(mk("Remove","small",()=>vsRemove(g.id)))}
+    r.append(a);box.append(r)});
+  // people to challenge
+  document.querySelectorAll("#vsTypes button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.type===vsType)));
+  const ppl=$("vsPeople");ppl.replaceChildren();const online=new Set(onlineIds());
+  const ids=Object.keys(profiles).filter(id=>id!==myId).sort((a,b)=>(online.has(b)-online.has(a))||nickOf(a).localeCompare(nickOf(b)));
+  if(!ids.length)ppl.append(el("p","sub","There's no one else here yet."));
+  ids.forEach(id=>{const r=el("div","vs-row");r.append(dotFor(profiles[id]));const w=el("div","who");const nm=el("b");if(online.has(id))nm.append(el("span","live"));nm.append(document.createTextNode(nickOf(id)));
+    w.append(nm,el("small",null,online.has(id)?"Online now":"Not online. They'll see it next time they're on."));r.append(w);
+    const a=el("div","acts");a.append(mk("Challenge","small primary",()=>vsChallenge(id,vsType,false)));r.append(a);ppl.append(r)});
+}
+document.querySelectorAll("#vsTypes button").forEach(b=>b.onclick=()=>{vsType=b.dataset.type;renderVersus()});
+function renderVsBoard(g){
+  const box=$("vsBoard");box.replaceChildren();
+  const top=el("div","row");top.style.justifyContent="space-between";top.style.width="100%";
+  top.append(mk("← Your games","small",()=>{vsActive=null;renderVersus()}));
+  if(g.status==="playing")top.append(mk("Give up","small danger",()=>vsGiveUp(g.id)));
+  box.append(top);
+  const pl=el("div","vs-players");
+  [[g.p1,1],[g.p2,2]].forEach(([id,num])=>{const d=el("span","pl"+(g.status==="playing"&&g.turn===num?" turn":""));
+    if(g.type==="c4"){const c=el("span","chipc");c.style.background=num===1?"var(--gold)":"var(--bad)";d.append(c)}else d.append(el("b",null,num===1?"X":"O"));
+    d.append(document.createTextNode(id===myId?"You":nickOf(id)));pl.append(d);if(num===1)pl.append(el("span","sub","vs"))});
+  box.append(pl,el("p","vs-status",vsStatusText(g)));
+  const myTurn=g.status==="playing"&&g.turn===vsMyNum(g);const win=new Set(g.line||[]);
+  if(g.type==="ttt"){const grid=el("div","ttt");g.board.forEach((v,i)=>{const sym=v==="1"?"X":v==="2"?"O":"";const b=el("button",(sym?sym.toLowerCase():"")+(win.has(i)?" win":""),sym);b.disabled=!myTurn||!!v;b.setAttribute("aria-label","Square "+(i+1)+(sym?" "+sym:" empty"));b.onclick=()=>vsMove(g.id,i);grid.append(b)});box.append(grid)}
+  else{const grid=el("div","c4");g.board.forEach((v,i)=>{const col=i%7;const full=!!g.board[col];const b=el("button",(v==="1"?"p1":v==="2"?"p2":"")+(win.has(i)?" win":""));b.disabled=!myTurn||full;b.setAttribute("aria-label","Column "+(col+1)+(v?", "+(v==="1"?"gold":"red"):""));b.onclick=()=>vsMove(g.id,col);grid.append(b)});box.append(grid)}
+  if(g.status==="done"){const r=el("div","row");r.style.justifyContent="center";
+    r.append(mk("Rematch","primary",()=>{const other=vsOther(g);vsRemove(g.id);vsChallenge(other,g.type,g.p1===myId)}),mk("Remove game","",()=>vsRemove(g.id)));box.append(r)}
+  else if(g.status==="playing"&&!myTurn)box.append(el("p","hint","Waiting for "+nickOf(vsOther(g))+". Their move will appear here."));
+}
+function onVersusSnapshot(){
+  const first=!vsLoaded;vsLoaded=true;vsNotify(!first);
+  if(vsActive&&!vsGames[vsActive]){vsActive=null;if(view==="versus")toast("That game was removed")}
+  renderVersus();renderApps();vsCredit();
+}
+
 /* ---------- chat attachments ---------- */
 const MAX_FILE=4*1024*1024;
 const FILE_TYPES={pdf:"application/pdf",doc:"application/msword",docx:"application/vnd.openxmlformats-officedocument.wordprocessingml.document",ppt:"application/vnd.ms-powerpoint",pptx:"application/vnd.openxmlformats-officedocument.presentationml.presentation",xls:"application/vnd.ms-excel",xlsx:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",txt:"text/plain",csv:"text/csv",mp3:"audio/mpeg",m4a:"audio/mp4",mp4:"video/mp4"};
@@ -1775,6 +2033,8 @@ $("composer").addEventListener("submit",async e=>{
   }
   $("msgInput").value="";clearAttach();
   const msg={by:myId,text:txt,at:Date.now()};if(att)msg.att=att;
+  if(replyTo&&replyTo.conv===activeConv)msg.re={id:replyTo.id,by:replyTo.by,text:replyTo.text};
+  clearReply();lastTypingSent=0;
   try{
     if(t){await db.doc("dms/"+t.id).collection("msgs").add(msg);await db.doc("dms/"+t.id).update({lastAt:msg.at,lastBy:myId,lastText:(txt||attLabel(att)).slice(0,80)})}
     else await db.collection("chat").add(msg);
@@ -1828,7 +2088,7 @@ function saveScore(k,v){
   const g=gameOf(k);const prev=myBest(k);
   if(prev!=null&&(g.lower?v>=prev:v<=prev))return;
   if(!loggedIn||!db){toast("Log in to put your score on the leaderboard");return}
-  saving=saving.then(async()=>{try{await db.doc("scores/"+myId).set(Object.assign({},scores[myId]||{},{[k]:v,at:Date.now()}));toast("New personal best: "+v+g.unit+"!")}catch(e){}});
+  saving=saving.then(async()=>{try{await db.doc("scores/"+myId).set(Object.assign({},scores[myId]||{},{[k]:v,at:Date.now()}));toast("New personal best: "+v+(v===1?g.unit.replace(/s$/,""):g.unit)+"!")}catch(e){}});
 }
 function ranked(g){return Object.entries(scores).filter(([id,s])=>typeof s[g.id]==="number"&&profiles[id]).sort((a,b)=>g.lower?a[1][g.id]-b[1][g.id]:b[1][g.id]-a[1][g.id])}
 function renderBoards(){
@@ -2398,6 +2658,8 @@ async function connect(){
     db.collection("scores").onSnapshot(s=>{const p={};s.docs.forEach(d=>p[d.id]=d.data());scores=p;renderBoards()},()=>{});
     db.collection("quizzes").onSnapshot(s=>{const p={};s.docs.forEach(d=>{const v=d.data();if(v&&Array.isArray(v.questions)&&v.questions.length)p[d.id]=v});quiz.setQuizzes(p)},()=>{});
     db.collection("quizres").onSnapshot(s=>{const p={};s.docs.forEach(d=>p[d.id]=d.data());quiz.setResults(p)},()=>{});
+    db.collection("reactions").onSnapshot(sn=>{const p={};sn.docs.forEach(d=>p[d.id]=d.data());reactions=p;if(view==="chat")renderChat()},()=>{});
+    db.collection("versus").onSnapshot(sn=>{const p={};sn.docs.forEach(d=>p[d.id]=d.data());vsGames=p;onVersusSnapshot()},()=>{});
     db.collection("polls").onSnapshot(sn=>{const p={};sn.docs.forEach(d=>p[d.id]=d.data());polls=p;if(view==="polls")renderPolls()},()=>{});
     db.collection("pollvotes").onSnapshot(sn=>{const p={};sn.docs.forEach(d=>p[d.id]=d.data());pollVotes=p;if(view==="polls")renderPolls()},()=>{});
     db.collection("countdowns").onSnapshot(sn=>{const p={};sn.docs.forEach(d=>p[d.id]=d.data());countdowns=p;renderCountdowns()},()=>{});
@@ -2409,6 +2671,7 @@ async function connect(){
   if(room){
     room.onPeers(ch=>{peers=ch.peers.slice();renderPeople();renderHome()},()=>{});
     peers=room.peers().slice();
+    room.on("typing",onTyping,()=>{});
     room.on("wave",msg=>{const d=msg.data||{};if(loggedIn&&d.to===myId&&d.from!==myId&&prefs().waves!==false)toast(nickOf(d.from)+" waved at you 👋")},()=>{});
   }
   renderAccount();
