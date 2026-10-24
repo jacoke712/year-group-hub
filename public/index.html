@@ -267,6 +267,16 @@ canvas{width:100%;height:auto;border-radius:10px;touch-action:none;display:block
 .me-row .who b{display:block;font-family:var(--font-display);font-size:1.1rem;overflow-wrap:anywhere}
 .me-row .who small{color:var(--muted)}
 
+/* admin app */
+.admin-list{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.admin-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--surface-2)}
+.admin-row .who{flex:1;min-width:140px}
+.admin-row .who b{display:block;overflow-wrap:anywhere}
+.admin-row .who small{color:var(--muted)}
+.admin-row .acts{display:flex;gap:6px;flex-wrap:wrap}
+.admin-search{border:1.5px solid var(--line);border-radius:8px;padding:9px 12px;background:var(--surface-2);font-weight:500;color:var(--ink);width:100%;max-width:360px}
+.admin-badge{display:inline-block;margin-left:6px;border-radius:999px;padding:0 8px;font-size:.7rem;font-weight:800;background:var(--gold-soft);color:var(--ink);border:1px solid var(--gold);vertical-align:middle}
+
 /* quizzes */
 .quiz-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
 .qcard{display:flex;flex-direction:column;gap:10px;padding:16px;overflow:hidden;border:1px solid var(--line);background:var(--surface);border-radius:14px}
@@ -628,6 +638,16 @@ canvas{width:100%;height:auto;border-radius:10px;touch-action:none;display:block
     <div class="settings" id="settingsBox"></div>
   </section>
 
+  <!-- ADMIN -->
+  <section id="view-admin" hidden>
+    <div class="view-head"><button class="back" data-open="home">← Home</button><h1>Admin</h1><p>Only admins can see this. If someone forgets their PIN, give them a new one here and tell them what it is, or turn their PIN off so they can choose their own.</p></div>
+    <div class="card pane">
+      <label for="adminSearch" class="eyebrow" style="display:block;margin-bottom:6px">Find a student</label>
+      <input id="adminSearch" class="admin-search" placeholder="Type a name" autocomplete="off">
+      <div class="admin-list" id="adminList"></div>
+    </div>
+  </section>
+
   <!-- LEADERBOARDS -->
   <section id="view-leaders" hidden>
     <div class="view-head"><button class="back" data-open="home">← Home</button><h1>Leaderboards</h1><p>The year's best scores in every game. Only your top score counts.</p></div>
@@ -664,6 +684,7 @@ const ICONS = {
   quizzes:'<path d="M4 5h16v11H9l-5 4z" '+S2+' stroke-linejoin="round"/><path d="M10 9a2 2 0 1 1 2.6 1.9c-.4.2-.6.5-.6.9v.4" '+S2+' stroke-linecap="round"/><circle cx="12" cy="14" r="1" fill="currentColor"/>',
   mypin:'<rect x="5" y="10.5" width="14" height="10" rx="2" '+S2+'/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3" '+S2+'/><circle cx="12" cy="15.5" r="1.4" fill="currentColor"/>',
   settings:'<circle cx="12" cy="12" r="3" '+S2+'/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1" '+S2+' stroke-linecap="round"/>',
+  admin:'<path d="M12 3l7 3v5c0 4.5-3 8.3-7 10-4-1.7-7-5.5-7-10V6z" '+S2+' stroke-linejoin="round"/><circle cx="12" cy="11" r="2" fill="currentColor"/><path d="M12 13v3" '+S2+' stroke-linecap="round"/>',
   leaders:'<path d="M7 4h10v4a5 5 0 0 1-10 0z" '+S2+'/><path d="M7 6H4v1a3 3 0 0 0 3 3M17 6h3v1a3 3 0 0 1-3 3M12 13v4M8 20h8" '+S2+' stroke-linecap="round"/>',
   snake:'<path d="M4 18h8a3 3 0 0 0 0-6H9a3 3 0 0 1 0-6h9" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><circle cx="19" cy="6" r="1.6" fill="currentColor"/>',
   hopper:'<circle cx="10" cy="13" r="6" '+S2+'/><circle cx="12" cy="11" r="1.2" fill="currentColor"/><path d="M15.5 13.5 21 12l-4.5 3.5M5 13c1.5-2 3-2 4.5 0" '+S2+' stroke-linejoin="round" stroke-linecap="round"/>',
@@ -675,7 +696,7 @@ const ICONS = {
   ttt:'<path d="M9 3v18M15 3v18M3 9h18M3 15h18" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4.5 4.5l3 3m0-3l-3 3" stroke="currentColor" stroke-width="1.8"/><circle cx="18" cy="18" r="1.8" '+S2+' stroke-width="1.8"/>'
 };
 const svg=id=>'<svg viewBox="0 0 24 24" aria-hidden="true">'+ICONS[id]+'</svg>';
-const APPS=[["chat","Chat","Talk to the whole year group"],["people","People","Who's online and who's joined"],["homework","Homework","Your homework and due dates"],["quizzes","Quizzes","Play and make quizzes for your year"],["games","Games","Eight games with year leaderboards"],["leaders","Leaderboards","The year's top scores"],["mypin","My PIN","Lock your account with a PIN"],["settings","Settings","Theme, text size and your account"]];
+const APPS=[["chat","Chat","Talk to the whole year group"],["people","People","Who's online and who's joined"],["homework","Homework","Your homework and due dates"],["quizzes","Quizzes","Play and make quizzes for your year"],["games","Games","Eight games with year leaderboards"],["leaders","Leaderboards","The year's top scores"],["mypin","My PIN","Lock your account with a PIN"],["settings","Settings","Theme, text size and your account"],["admin","Admin","Change anyone's PIN if they forget it"]];
 const GAMES=[
   {id:"snake",name:"Snake",desc:"Eat, grow, don't crash.",lower:false,unit:""},
   {id:"hopper",name:"Sky Hopper",desc:"Tap to flap through the gaps.",lower:false,unit:""},
@@ -687,7 +708,7 @@ const GAMES=[
   {id:"ttt",name:"Noughts & Crosses",desc:"Three in a row beats the computer.",scored:false}
 ];
 const SCORED=GAMES.filter(g=>g.scored!==false);
-const VIEWS=["start","mypin","settings","home","chat","people","homework","quizzes","quizplay","quizmake","games","leaders",...GAMES.map(g=>g.id)];
+const VIEWS=["start","mypin","settings","admin","home","chat","people","homework","quizzes","quizplay","quizmake","games","leaders",...GAMES.map(g=>g.id)];
 
 let db=null, user=null, room=null, assets=null, myId=sess.get("yg-student"), isOwner=false, canWrite=null, dbReady=false, admins=[];
 const isAdmin=id=>!!id&&admins.includes(id);
@@ -717,6 +738,7 @@ function stopAll(){stopSnake();hop.stop();bricks.stop();reaction.stop()}
 function open(v){
   if(!VIEWS.includes(v))v="home";
   if(!loggedIn)v="start";else if(v==="start")v="home";
+  if(v==="admin"&&!adminActive())v="home";
   view=v;
   VIEWS.forEach(x=>$("view-"+x).hidden=x!==v);
   stopAll();
@@ -726,6 +748,7 @@ function open(v){
   if(v==="word")word.load();
   if(v==="mypin")renderPin();
   if(v==="settings")renderSettings();
+  if(v==="admin"){$("adminSearch").value="";renderAdmin()}
   window.scrollTo(0,0);
   try{history.replaceState(null,"",(v==="home"||v==="start")?location.pathname+location.search:"#"+v)}catch(e){}
 }
@@ -733,7 +756,7 @@ document.addEventListener("click",e=>{const b=e.target.closest("[data-open]");if
 $("brandBtn").onclick=()=>open("home");
 function renderApps(){
   const hidden=prefs().hide||[];$("apps").replaceChildren();
-  APPS.forEach(([id,name,desc])=>{if(id!=="settings"&&hidden.includes(id))return;const b=el("button","app");b.dataset.open=id;const ic=el("span","ic");ic.innerHTML=svg(id);b.append(ic,el("b",null,name),el("small",null,desc));
+  APPS.forEach(([id,name,desc])=>{if(id==="admin"&&!adminActive())return;if(id!=="settings"&&hidden.includes(id))return;const b=el("button","app");b.dataset.open=id;const ic=el("span","ic");ic.innerHTML=svg(id);b.append(ic,el("b",null,name),el("small",null,desc));
     if(id==="chat"&&loggedIn){const n=chatBadgeCount();if(n){const bd=el("span","badge",String(n));bd.setAttribute("aria-label",n+" new");b.append(bd)}}
     $("apps").append(b)});
 }
@@ -784,6 +807,7 @@ function renderAccount(){
   if(loggedIn&&view==="start"){const v=pendingView||"home";pendingView=null;open(v)}
   else if(!loggedIn&&view!=="start")open("start");
   renderStart();hwSync();dmSync();renderPeople();renderChat();renderHome();renderBoards();quiz.refresh();
+  if(view==="admin"){if(adminActive())renderAdmin();else open("home")}
 }
 function closeModal(){$("overlay").hidden=true;$("modal").replaceChildren();$("modal").onkeydown=null}
 $("overlay").addEventListener("click",e=>{if(e.target.id==="overlay")closeModal()});
@@ -937,8 +961,50 @@ async function setAdmin(uid,on){
 }
 function resetPin(uid){
   modal("Reset "+nickOf(uid)+"'s PIN?",m=>{m.append(el("p",null,"This turns their PIN off so they can get back in and choose a new one."));
-    const go=mk("Reset PIN","primary",async()=>{go.disabled=true;try{const d=Object.assign({},profiles[uid]);delete d.pinHash;delete d.pinSalt;await db.doc("profiles/"+uid).set(d);closeModal();toast("PIN reset")}catch(e){go.disabled=false;toast("Couldn't reset")}});
+    const go=mk("Reset PIN","primary",async()=>{go.disabled=true;try{const d=Object.assign({},profiles[uid]);delete d.pinHash;delete d.pinSalt;await db.doc("profiles/"+uid).set(d);profiles[uid]=d;closeModal();renderAdmin();toast("PIN reset")}catch(e){go.disabled=false;toast("Couldn't reset")}});
     btnRow(m,mk("Cancel","",closeModal),go)});
+}
+/* ---------- admin app ---------- */
+function renderAdmin(){
+  const box=$("adminList");if(!box)return;box.replaceChildren();
+  if(!adminActive())return;
+  const q=$("adminSearch").value.trim().toLowerCase();
+  const ids=Object.keys(profiles).filter(id=>!q||(profiles[id].nick||"").toLowerCase().includes(q)).sort((a,b)=>(profiles[a].nick||"").localeCompare(profiles[b].nick||""));
+  if(!ids.length){box.append(el("p","sub",q?"No one matches that name.":"No students yet."));return}
+  ids.forEach(id=>{
+    const p=profiles[id];const row=el("div","admin-row");row.append(dotFor(p));
+    const who=el("div","who");const nm=el("b",null,p.nick||"Student");if(isAdmin(id))nm.append(el("span","admin-badge","Admin"));
+    who.append(nm,el("small",null,(id===myId?"You · ":"")+(p.pinHash?"Has a PIN":"No PIN")));row.append(who);
+    const acts=el("div","acts");
+    if(id===myId){const b=el("button","btn small","Use My PIN");b.dataset.open="mypin";acts.append(b)}
+    else{
+      acts.append(mk(p.pinHash?"Set new PIN":"Set a PIN","small primary",()=>adminSetPin(id)));
+      if(p.pinHash)acts.append(mk("Turn off PIN","small",()=>resetPin(id)));
+    }
+    row.append(acts);box.append(row);
+  });
+}
+$("adminSearch").addEventListener("input",renderAdmin);
+function adminSetPin(uid){
+  if(!adminActive())return;
+  const p=profiles[uid];if(!p)return;
+  modal("New PIN for "+(p.nick||"this student"),m=>{
+    const intro=el("p","sub","Pick a PIN of 4 to 6 numbers, then tell "+(p.nick||"them")+" what it is. They can change it later in My PIN.");intro.style.margin="0";m.append(intro);
+    const f=(label,id)=>{const l=el("label",null,label);const i=el("input");i.id=id;i.type="password";i.inputMode="numeric";i.maxLength=6;i.autocomplete="off";i.oninput=()=>{i.value=i.value.replace(/\D/g,"")};l.append(i);m.append(l);return i};
+    const a=f("New PIN","adminPin1"),b=f("Type it again","adminPin2");
+    const err=el("p","err");err.hidden=true;m.append(err);
+    const go=mk("Save PIN","primary",async()=>{
+      err.hidden=true;
+      if(!/^\d{4,6}$/.test(a.value)){err.textContent="The PIN needs 4 to 6 numbers.";err.hidden=false;return}
+      if(a.value!==b.value){err.textContent="The two PINs don't match.";err.hidden=false;return}
+      if(!adminActive()){err.textContent="Only admins can do this.";err.hidden=false;return}
+      go.disabled=true;
+      try{const salt=newSalt();const d=Object.assign({},profiles[uid],{pinSalt:salt,pinHash:await pinHash(uid,salt,a.value)});await db.doc("profiles/"+uid).set(d);profiles[uid]=d;delete pinLocks[uid];closeModal();renderAdmin();toast((p.nick||"Their")+"'s PIN has been changed")}
+      catch(e){go.disabled=false;err.textContent="Couldn't save the PIN. Try again.";err.hidden=false}
+    });
+    b.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();go.click()}});
+    btnRow(m,mk("Cancel","",closeModal),go);
+  });
 }
 /* ---------- settings ---------- */
 const hostTheme=document.documentElement.getAttribute("data-theme");
@@ -982,7 +1048,7 @@ function renderSettings(){
   // home page
   const hp=section("Home page","Untick an app to hide it from your home page. Settings always stays so you can bring apps back.");
   const ch=el("div","checks");const hidden=s.hide||[];
-  APPS.filter(([id])=>id!=="settings").forEach(([id,name])=>{const l=el("label");const i=el("input");i.type="checkbox";i.id="show-"+id;i.checked=!hidden.includes(id);
+  APPS.filter(([id])=>id!=="settings"&&(id!=="admin"||adminActive())).forEach(([id,name])=>{const l=el("label");const i=el("input");i.type="checkbox";i.id="show-"+id;i.checked=!hidden.includes(id);
     i.onchange=()=>{const cur=(profiles[myId].settings||{}).hide||[];const next=i.checked?cur.filter(x=>x!==id):[...new Set([...cur,id])];setPref({hide:next})};l.append(i,el("span",null,name));ch.append(l)});
   hp.append(ch);
 
@@ -1831,7 +1897,7 @@ async function connect(){
     db.collection("scores").onSnapshot(s=>{const p={};s.docs.forEach(d=>p[d.id]=d.data());scores=p;renderBoards()},()=>{});
     db.collection("quizzes").onSnapshot(s=>{const p={};s.docs.forEach(d=>{const v=d.data();if(v&&Array.isArray(v.questions)&&v.questions.length)p[d.id]=v});quiz.setQuizzes(p)},()=>{});
     db.collection("quizres").onSnapshot(s=>{const p={};s.docs.forEach(d=>p[d.id]=d.data());quiz.setResults(p)},()=>{});
-    db.doc("config/admins").onSnapshot(s=>{admins=(s.exists&&Array.isArray(s.data().ids))?s.data().ids:[];renderPeople();renderHome();renderChat();quiz.refresh();if(view==="settings")renderSettings()},()=>{});
+    db.doc("config/admins").onSnapshot(s=>{admins=(s.exists&&Array.isArray(s.data().ids))?s.data().ids:[];renderPeople();renderHome();renderChat();quiz.refresh();renderApps();if(view==="settings")renderSettings();if(view==="admin"){if(adminActive())renderAdmin();else open("home")}},()=>{});
     db.doc("config/site").onSnapshot(s=>{const n=(s.exists&&s.data().name)||"Our Year Group";$("siteName").textContent=n;$("crest").textContent=initials(n);renderHome()},()=>{});
   }
   if(room){
