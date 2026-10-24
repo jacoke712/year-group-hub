@@ -73,7 +73,9 @@ header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var
 .notice{background:var(--gold-soft);border:1px solid var(--gold);border-radius:10px;padding:10px 14px;font-weight:600;margin-bottom:14px}
 .eyebrow{font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:800;margin:0}
 .sub{color:var(--muted);margin:0 0 12px}
-main{padding-block:24px 56px}
+main{padding-block:24px 32px}
+.site-foot{border-top:1px solid var(--line);padding-block:18px calc(22px + env(safe-area-inset-bottom,0px));text-align:center;color:var(--muted);font-size:.85rem}
+.site-foot b{color:var(--ink);font-weight:800}
 
 /* home */
 .home{display:flex;flex-direction:column;gap:22px}
@@ -632,6 +634,8 @@ canvas{width:100%;height:auto;border-radius:10px;touch-action:none;display:block
     <div class="boards" id="allBoards"></div>
   </section>
 </main>
+
+<footer class="site-foot"><div class="wrap">Made by <b>Jack</b> and <b>Arturo</b></div></footer>
 
 <div class="overlay" id="overlay" hidden>
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" id="modal"></div>

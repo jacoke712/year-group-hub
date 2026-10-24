@@ -33,7 +33,8 @@
     "#ygGate input{font:600 1.4rem var(--font-mono,ui-monospace,monospace);letter-spacing:.35em;text-align:center;border:1.5px solid var(--line,#dde3ee);border-radius:10px;padding:12px;background:var(--surface-2,#f7f9fc);color:var(--ink,#111a2e);width:100%}" +
     "#ygGate button{border:0;border-radius:10px;padding:12px 16px;font:800 1rem var(--font-body,system-ui);background:var(--primary,#16264a);color:var(--primary-ink,#fff);cursor:pointer}" +
     "#ygGate button:disabled{opacity:.6;cursor:default}" +
-    "#ygGate .err{color:var(--bad,#c23b3b);font-weight:700;min-height:1.4em}";
+    "#ygGate .err{color:var(--bad,#c23b3b);font-weight:700;min-height:1.4em}" +
+    "#ygGate .foot{text-align:center;font-size:.85rem;border-top:1px solid var(--line,#dde3ee);padding-top:12px}#ygGate .foot b{color:var(--ink,#111a2e)}";
   function showGate() {
     if (gateShown) return; gateShown = true;
     var mount = function () {
@@ -42,7 +43,8 @@
       g.innerHTML = '<form class="box" novalidate><span class="crest" aria-hidden="true">YG</span><h1 id="ygGateTitle">Enter the class code</h1>' +
         '<p>This site is just for our year group. Ask a classmate or your teacher for the code.</p>' +
         '<input id="ygCode" type="password" inputmode="numeric" autocomplete="off" maxlength="20" aria-label="Class code" placeholder="••••">' +
-        '<p class="err" id="ygErr" role="alert"></p><button type="submit" id="ygGo">Go in</button></form>';
+        '<p class="err" id="ygErr" role="alert"></p><button type="submit" id="ygGo">Go in</button>' +
+        '<p class="foot">Made by <b>Jack</b> and <b>Arturo</b></p></form>';
       document.body.appendChild(g);
       var input = g.querySelector("#ygCode"), errEl = g.querySelector("#ygErr"), go = g.querySelector("#ygGo");
       setTimeout(function () { input.focus(); }, 50);
