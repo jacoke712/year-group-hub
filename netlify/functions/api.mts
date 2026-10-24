@@ -5,7 +5,7 @@ import { getStore } from "@netlify/blobs";
 import seed from "./seed.json";
 
 const COOKIE = "ygc";
-const COOKIE_DAYS = 180;
+const PASS_HOURS = 12;        // a class-code pass lasts at most this long
 const MAX_FAILS = 10;               // wrong codes allowed per IP...
 const FAIL_WINDOW = 15 * 60 * 1000; // ...in this window
 const CHANGE_TTL = 10 * 60 * 1000;
@@ -43,11 +43,14 @@ function getCookie(req: Request, name: string) {
   for (const part of raw.split(/;\s*/)) { const i = part.indexOf("="); if (i > 0 && part.slice(0, i) === name) return decodeURIComponent(part.slice(i + 1)); }
   return null;
 }
-async function tokenFor(code: string) { return sha256("yg-class-v1|" + code); }
+// Token = "<issued ms>.<hash of code + issued time>", so passes expire and a changed code cancels them.
+async function tokenFor(code: string, issued: number) { return issued + "." + await sha256("yg-class-v2|" + code + "|" + issued); }
 async function isAuthed(req: Request) {
   const code = classCode(); if (!code) return false;
   const c = getCookie(req, COOKIE); if (!c) return false;
-  return safeEqual(c, await tokenFor(code));
+  const issued = Number(c.split(".")[0]);
+  if (!Number.isFinite(issued) || issued > Date.now() + 60000 || Date.now() - issued > PASS_HOURS * 3600 * 1000) return false;
+  return safeEqual(c, await tokenFor(code, issued));
 }
 function segs(path: unknown): string[] | null {
   if (typeof path !== "string" || path.length > 1000) return null;
@@ -137,7 +140,8 @@ async function login(req: Request, ip: string) {
     return fail(401, "wrong_code", "That code isn't right.");
   }
   if (rec) await store().delete(key);
-  const cookie = `${COOKIE}=${await tokenFor(code)}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${COOKIE_DAYS * 86400}`;
+  // No Max-Age: the browser drops it when it closes, and the server stops accepting it after PASS_HOURS.
+  const cookie = `${COOKIE}=${await tokenFor(code, Date.now())}; Path=/; HttpOnly; Secure; SameSite=Lax`;
   return json({ ok: true }, 200, { "set-cookie": cookie });
 }
 

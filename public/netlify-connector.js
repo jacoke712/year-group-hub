@@ -18,7 +18,7 @@
     try { r = await fetch(url, Object.assign({ credentials: "same-origin" }, opts)); }
     catch (e) { throw err("unavailable", "Can't reach the site. Check your internet connection."); }
     var j = await r.json().catch(function () { return {}; });
-    if (r.status === 401 && url.indexOf("/api/login") < 0) { showGate(); throw err("unavailable", "Enter the class code first."); }
+    if (r.status === 401 && url.indexOf("/api/login") < 0) { tabOk(false); showGate(); throw err("unavailable", "Enter the class code first."); }
     if (!r.ok) throw err(j.code || (r.status === 413 ? "invalid_argument" : "unavailable"), j.error || "Something went wrong.");
     return j;
   }
@@ -52,15 +52,19 @@
         go.disabled = true; go.textContent = "Checking…";
         try {
           await call("/api/login", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ code: code }) });
-          g.remove(); gateShown = false; readyResolve(); kick();
+          tabOk(true); g.remove(); gateShown = false; readyResolve(); kick();
         } catch (ex) { errEl.textContent = ex.message; input.value = ""; input.focus(); }
         go.disabled = false; go.textContent = "Go in";
       });
     };
     if (document.body) mount(); else document.addEventListener("DOMContentLoaded", mount);
   }
-  fetch("/api/me", { credentials: "same-origin" }).then(function (r) { return r.json(); }).then(function (j) {
-    if (j.ok) readyResolve(); else showGate();
+  // Ask for the code every time the site is opened in a new tab or window.
+  // Refreshing a tab that already has the code doesn't ask again.
+  function tabOk(v) { try { if (v === undefined) return sessionStorage.getItem("yg-tab-ok") === "1"; if (v) sessionStorage.setItem("yg-tab-ok", "1"); else sessionStorage.removeItem("yg-tab-ok"); } catch (e) { return false; } }
+  if (!tabOk()) showGate();
+  else fetch("/api/me", { credentials: "same-origin" }).then(function (r) { return r.json(); }).then(function (j) {
+    if (j.ok) readyResolve(); else { tabOk(false); showGate(); }
   }).catch(function () { showGate(); });
 
   /* ---------------- document store ---------------- */
