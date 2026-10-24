@@ -153,6 +153,25 @@ main{padding-block:24px 32px}
 .pick:disabled{opacity:.6;cursor:default}
 .pick:not(:disabled):hover{border-color:var(--gold)}
 
+/* chat attachments */
+.attach-btn{width:44px;height:44px;flex:none;border-radius:50%;border:1.5px solid var(--line);background:var(--surface-2);display:grid;place-items:center;color:var(--ink);padding:0}
+.attach-btn svg{width:20px;height:20px}
+.attach-btn:disabled{opacity:.5;cursor:not-allowed}
+.attach-preview{display:flex;align-items:center;gap:10px;padding:8px 10px;margin-bottom:8px;border:1px dashed var(--line);border-radius:12px;background:var(--surface-2)}
+.attach-preview img{width:52px;height:52px;object-fit:cover;border-radius:8px;flex:none}
+.attach-preview .fi{width:52px;height:52px;border-radius:8px;flex:none;display:grid;place-items:center;background:var(--band);color:var(--gold);font:800 .72rem var(--font-mono);text-transform:uppercase}
+.attach-preview .tx{flex:1;min-width:0}
+.attach-preview .tx b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.attach-preview .tx small{color:var(--muted)}
+.attach-preview .x{border:0;background:none;font-size:1.4rem;line-height:1;color:var(--muted);padding:4px 8px}
+.att-img{display:block;max-width:min(260px,100%);max-height:300px;border-radius:10px;margin-top:6px;background:var(--line)}
+.att-file{display:flex;align-items:center;gap:10px;margin-top:6px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--surface);width:min(260px,60vw);max-width:100%}
+.att-file .fi{width:40px;height:40px;border-radius:8px;flex:none;display:grid;place-items:center;background:var(--band);color:var(--gold);font:800 .68rem var(--font-mono);text-transform:uppercase}
+.att-file .tx{flex:1;min-width:0}
+.att-file .tx b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;font-size:.85rem;line-height:1.3;overflow:hidden;overflow-wrap:anywhere}
+.att-file .tx small{color:var(--muted);font-size:.75rem}
+.att-file a,.att-file button{font-size:.8rem;font-weight:800;color:var(--ink);white-space:nowrap}
+
 /* chat */
 .chat{display:flex;flex-direction:column;height:min(66vh,620px)}
 .msgs{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:12px;padding:4px 4px 12px;min-height:0}
@@ -513,7 +532,10 @@ canvas{width:100%;height:auto;border-radius:10px;touch-action:none;display:block
     <div class="card pane chat">
       <div class="dm-bar" id="dmBar" hidden></div>
       <div class="msgs" id="msgs"></div>
+      <div class="attach-preview" id="attachPreview" hidden></div>
       <form class="composer" id="composer">
+        <button type="button" class="attach-btn" id="attachBtn" aria-label="Attach a photo or file" title="Attach a photo or file" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11.5l-7.8 7.8a5 5 0 0 1-7.1-7.1l8.5-8.5a3.3 3.3 0 0 1 4.7 4.7l-8.4 8.4a1.7 1.7 0 0 1-2.4-2.4l7.7-7.7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <input type="file" id="attachInput" hidden accept="image/png,image/jpeg,image/gif,image/webp,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.csv,.mp3,.m4a,.mp4">
         <input id="msgInput" maxlength="300" autocomplete="off" placeholder="Log in to chat" disabled>
         <button class="btn primary" id="sendBtn" disabled>Send</button>
       </form>
@@ -930,7 +952,7 @@ function renderHome(){
   const pv=$("preview");pv.replaceChildren();
   const last=messages.slice(-3).reverse();
   if(!last.length){const e=el("div","empty");e.append(el("strong",null,"No messages yet"),document.createTextNode(loggedIn?"Be the first to say hi.":"Log in and be the first to say hi."));pv.append(e)}
-  last.forEach(m=>{const r=el("div","pm");r.append(dotFor(profiles[m.by]));const d=el("div");d.append(el("b",null,m.by===myId?"You":nickOf(m.by)),el("p",null,m.text));r.append(d,el("time",null,fmtTime(m.at)));pv.append(r)});
+  last.forEach(m=>{const r=el("div","pm");r.append(dotFor(profiles[m.by]));const d=el("div");d.append(el("b",null,m.by===myId?"You":nickOf(m.by)),el("p",null,m.text||attLabel(m.att)));r.append(d,el("time",null,fmtTime(m.at)));pv.append(r)});
   $("renameBtn").hidden=!adminActive();
 }
 
@@ -1202,7 +1224,7 @@ $("chatClear").onclick=()=>{
     m.append(el("p",null,"This deletes every message in the year chat for everyone. It can't be undone. Private chats aren't affected."));
     const go=mk("Clear the chat","danger solid",async()=>{
       go.disabled=true;go.textContent="Clearing…";
-      try{const all=await db.collection("chat").get();for(const d of all.docs)await db.doc("chat/"+d.id).delete();closeModal();toast("Year chat cleared")}
+      try{const all=await db.collection("chat").get();for(const d of all.docs){const v=d.data()||{};await db.doc("chat/"+d.id).delete();dropAtt(v)}closeModal();toast("Year chat cleared")}
       catch(e){go.disabled=false;go.textContent="Clear the chat";toast("Couldn't clear everything. Try again.")}
     });
     btnRow(m,mk("Cancel","",closeModal),go);
@@ -1560,7 +1582,7 @@ function renderChatHead(){
     tx.append(el("b",null,n+" declined your request"),el("small",null,"You can't send another request to them."));bar.append(tx,mk("Remove","small",()=>hideDeclined(t)));setComposer(false,"You can't message "+n);
   }
 }
-function setComposer(on,ph){const can=on&&loggedIn&&db&&canWrite!==false;$("msgInput").disabled=!can;$("sendBtn").disabled=!can;$("msgInput").placeholder=canWrite===false?"Your access is view-only":ph}
+function setComposer(on,ph){const can=on&&loggedIn&&db&&canWrite!==false;$("msgInput").disabled=!can;$("sendBtn").disabled=!can;$("attachBtn").disabled=!can||!assets;if(!can)clearAttach();$("msgInput").placeholder=canWrite===false?"Your access is view-only":ph}
 function setConv(id){
   activeConv=id;
   const want=id==="year"?null:id;
@@ -1617,7 +1639,7 @@ function confirmLeave(t){
   const n=nickOf(otherOf(t));
   modal("Leave your chat with "+n+"?",m=>{m.append(el("p",null,"This deletes the chat and all its messages for both of you. You'd need to send a new request to chat again."));
     const go=mk("Leave chat","danger solid",async()=>{go.disabled=true;try{
-      try{const ms=await db.doc("dms/"+t.id).collection("msgs").get();for(const d of ms.docs)await db.doc("dms/"+t.id).collection("msgs").doc(d.id).delete()}catch(e){}
+      try{const ms=await db.doc("dms/"+t.id).collection("msgs").get();for(const d of ms.docs){const v=d.data()||{};await db.doc("dms/"+t.id).collection("msgs").doc(d.id).delete();dropAtt(v)}}catch(e){}
       await db.doc("dms/"+t.id).delete();closeModal();setConv("year");toast("You left the chat")}catch(e){go.disabled=false;toast("Couldn't leave. Try again.")}});
     btnRow(m,mk("Cancel","",closeModal),go)});
 }
@@ -1663,26 +1685,103 @@ function renderChat(){
     const mine=m.by===myId;const row=el("div","msg"+(mine?" mine":""));
     row.append(dotFor(profiles[m.by]));
     const b=el("div","bubble");const meta=el("div","meta");meta.append(el("b",null,mine?"You":nickOf(m.by)),el("span",null,fmtTime(m.at)));
-    if(loggedIn&&(mine||(adminActive()&&!t))){const d=el("button","link","Delete");d.onclick=()=>(t?db.doc("dms/"+t.id).collection("msgs").doc(m.id):db.doc("chat/"+m.id)).delete().catch(()=>toast("Couldn't delete"));meta.append(d)}
-    b.append(meta,el("div","text",m.text));row.append(b);box.append(row);
+    if(loggedIn&&(mine||(adminActive()&&!t))){const d=el("button","link","Delete");d.onclick=()=>(t?db.doc("dms/"+t.id).collection("msgs").doc(m.id):db.doc("chat/"+m.id)).delete().then(()=>dropAtt(m)).catch(()=>toast("Couldn't delete"));meta.append(d)}
+    b.append(meta);if(m.text)b.append(el("div","text",m.text));if(m.att)b.append(attView(m.att,m.by));row.append(b);box.append(row);
   });
   if(atBottom||!box.dataset.init){box.scrollTop=box.scrollHeight;box.dataset.init="1"}
+}
+/* ---------- chat attachments ---------- */
+const MAX_FILE=4*1024*1024;
+const FILE_TYPES={pdf:"application/pdf",doc:"application/msword",docx:"application/vnd.openxmlformats-officedocument.wordprocessingml.document",ppt:"application/vnd.ms-powerpoint",pptx:"application/vnd.openxmlformats-officedocument.presentationml.presentation",xls:"application/vnd.ms-excel",xlsx:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",txt:"text/plain",csv:"text/csv",mp3:"audio/mpeg",m4a:"audio/mp4",mp4:"video/mp4"};
+const IMG_TYPES={png:"image/png",jpg:"image/jpeg",jpeg:"image/jpeg",gif:"image/gif",webp:"image/webp"};
+let pendingAtt=null;
+const extOf=n=>{const m=/\.([a-z0-9]{1,5})$/i.exec(n||"");return m?m[1].toLowerCase():""};
+const fmtSize=b=>b<1024?b+" B":b<1048576?Math.round(b/1024)+" KB":(b/1048576).toFixed(1)+" MB";
+const attLabel=a=>!a?"":a.kind==="image"?"Photo":"File: "+(a.name||"file");
+function shrinkImage(file){
+  return new Promise(res=>{
+    if(!/^image\/(png|jpeg|webp)$/.test(file.type)){res(file);return}
+    const url=URL.createObjectURL(file);const im=new Image();
+    im.onload=()=>{const k=Math.min(1,1600/Math.max(im.width,im.height));const cv=document.createElement("canvas");cv.width=Math.round(im.width*k);cv.height=Math.round(im.height*k);
+      const cx=cv.getContext("2d");cx.fillStyle="#fff";cx.fillRect(0,0,cv.width,cv.height);cx.drawImage(im,0,0,cv.width,cv.height);URL.revokeObjectURL(url);
+      cv.toBlob(b=>res(b&&b.size<file.size?b:file),"image/jpeg",.85)};
+    im.onerror=()=>{URL.revokeObjectURL(url);res(file)};im.src=url;
+  });
+}
+function clearAttach(){if(pendingAtt&&pendingAtt.preview)URL.revokeObjectURL(pendingAtt.preview);pendingAtt=null;const pv=$("attachPreview");if(pv){pv.hidden=true;pv.replaceChildren()}const fi=$("attachInput");if(fi)fi.value=""}
+function showAttach(){
+  const pv=$("attachPreview");pv.replaceChildren();if(!pendingAtt){pv.hidden=true;return}
+  const a=pendingAtt;
+  if(a.kind==="image"){const im=el("img");im.src=a.preview;im.alt="";pv.append(im)}else pv.append(el("span","fi",extOf(a.name)||"file"));
+  const tx=el("div","tx");tx.append(el("b",null,a.name),el("small",null,(a.kind==="image"?"Photo":"File")+" · "+fmtSize(a.blob.size)+" · add a message or just press Send"));pv.append(tx);
+  const x=el("button","x","×");x.type="button";x.setAttribute("aria-label","Remove attachment");x.onclick=clearAttach;pv.append(x);
+  pv.hidden=false;
+}
+$("attachBtn").onclick=()=>{if(!assets){toast("Sending files isn't available on your account");return}$("attachInput").click()};
+$("attachInput").addEventListener("change",async()=>{
+  const f=$("attachInput").files&&$("attachInput").files[0];if(!f)return;
+  const ext=extOf(f.name);const isImg=!!IMG_TYPES[ext]||/^image\/(png|jpeg|gif|webp)$/.test(f.type);
+  if(!isImg&&!FILE_TYPES[ext]){toast("You can send photos, PDFs, Word, PowerPoint, Excel, text, music and video files.");clearAttach();return}
+  let blob=f,type=isImg?(IMG_TYPES[ext]||f.type):FILE_TYPES[ext];
+  if(isImg){blob=await shrinkImage(f);if(blob!==f)type="image/jpeg"}
+  if(blob.size>MAX_FILE){toast("That file is too big. Files can be up to 4 MB.");clearAttach();return}
+  const name=(isImg&&blob!==f?f.name.replace(/\.[^.]+$/,"")+".jpg":f.name).slice(0,100);
+  if(pendingAtt&&pendingAtt.preview)URL.revokeObjectURL(pendingAtt.preview);
+  pendingAtt={blob:new Blob([blob],{type}),name,type,kind:isImg?"image":"file",preview:isImg?URL.createObjectURL(blob):null};
+  showAttach();$("msgInput").focus();
+});
+async function uploadAtt(a){
+  if(!assets)throw{code:"unsupported_type"};
+  const file=new File([a.blob],a.name,{type:a.type});
+  const r=await assets.upload(file);
+  return{id:r.id,kind:a.kind,name:a.name,size:a.blob.size,type:a.type};
+}
+function dropAtt(m){const a=m&&m.att;if(a&&a.id&&assets)assets.delete(a.id).catch(()=>{})}
+const attSrc=id=>/^[0-9a-f]{32}$/.test(id||"")?"/_blob/"+id:"";
+let downloadsCap=null;
+async function saveFile(a){
+  try{
+    if(downloadsCap){const r=await fetch(attSrc(a.id));if(!r.ok)throw 0;await downloadsCap.save({filename:a.name||"file",data:await r.blob()});return}
+  }catch(e){if(e&&e.code==="rejected_extension"){toast("That kind of file can't be downloaded here.");return}}
+  const link=document.createElement("a");link.href=attSrc(a.id);link.download=a.name||"file";document.body.append(link);link.click();link.remove();
+}
+function attView(a,by){
+  const src=attSrc(a.id);if(!src)return el("span");
+  if(a.kind==="image"){
+    const link=el("a");link.href=src;link.target="_blank";link.rel="noopener";
+    const im=el("img","att-img");im.src=src;im.loading="lazy";im.alt="Photo from "+(by===myId?"you":nickOf(by));
+    im.onerror=()=>{link.replaceWith(el("small","sub","This photo isn't available any more."))};
+    link.append(im);return link;
+  }
+  const box=el("div","att-file");box.append(el("span","fi",extOf(a.name)||"file"));
+  const tx=el("div","tx");tx.append(el("b",null,a.name||"File"),el("small",null,a.size?fmtSize(a.size):""));box.append(tx);
+  const dl=el("button","link","Download");dl.type="button";dl.onclick=()=>saveFile(a);box.append(dl);
+  return box;
 }
 let lastSend=0;
 $("composer").addEventListener("submit",async e=>{
   e.preventDefault();if(!loggedIn||!db)return;
   const t=curThread();if(t&&t.status!=="accepted")return;
   if(!t&&isMuted(myId)){toast("An admin has muted you in the year chat");return}
-  const txt=clean($("msgInput").value.trim()).slice(0,300);if(!txt)return;
+  const txt=clean($("msgInput").value.trim()).slice(0,300);const pend=pendingAtt;if(!txt&&!pend)return;
   if(Date.now()-lastSend<1500){toast("Slow down a bit");return}
-  lastSend=Date.now();$("msgInput").value="";
+  lastSend=Date.now();
+  let att=null;
+  if(pend){
+    $("sendBtn").disabled=true;$("sendBtn").textContent="Sending…";
+    try{att=await uploadAtt(pend)}
+    catch(err){$("sendBtn").disabled=false;$("sendBtn").textContent="Send";toast(err&&err.code==="unsupported_type"?"That kind of file can't be sent here.":err&&err.code==="quota_exceeded"?"The site is out of space for files. Ask an admin to clear old chats.":(err&&err.message)||"Couldn't send the file. Try again.");return}
+    $("sendBtn").disabled=false;$("sendBtn").textContent="Send";
+  }
+  $("msgInput").value="";clearAttach();
+  const msg={by:myId,text:txt,at:Date.now()};if(att)msg.att=att;
   try{
-    if(t){const at=Date.now();await db.doc("dms/"+t.id).collection("msgs").add({by:myId,text:txt,at});await db.doc("dms/"+t.id).update({lastAt:at,lastBy:myId,lastText:txt.slice(0,80)})}
-    else await db.collection("chat").add({by:myId,text:txt,at:Date.now()});
-  }catch(err){$("msgInput").value=txt;toast(err&&err.code==="quota_exceeded"?"The site is full. Ask the site owner to clear old messages.":"Message didn't send. Try again.")}
+    if(t){await db.doc("dms/"+t.id).collection("msgs").add(msg);await db.doc("dms/"+t.id).update({lastAt:msg.at,lastBy:myId,lastText:(txt||attLabel(att)).slice(0,80)})}
+    else await db.collection("chat").add(msg);
+  }catch(err){$("msgInput").value=txt;if(att)dropAtt({att});toast(err&&err.code==="quota_exceeded"?"The site is full. Ask the site owner to clear old messages.":"Message didn't send. Try again.")}
   if(!t&&Math.random()<0.1)prune();
 });
-async function prune(){try{const s=await db.collection("chat").orderBy("at","desc").limit(400).get();for(const d of s.docs.slice(300,320)){await db.doc("chat/"+d.id).delete()}}catch(e){}}
+async function prune(){try{const s=await db.collection("chat").orderBy("at","desc").limit(400).get();for(const d of s.docs.slice(300,320)){const v=d.data()||{};await db.doc("chat/"+d.id).delete();dropAtt(v)}}catch(e){}}
 
 /* ---------- people ---------- */
 function onlineIds(){const seen=new Set();peers.forEach(p=>{const uid=p.presence&&p.presence.uid;if(uid&&profiles[uid])seen.add(uid)});return [...seen]}
@@ -2289,6 +2388,7 @@ async function connect(){
   const [u,d,r]=await Promise.all([C.use("user"),C.use("db"),C.use("room")]);
   user=u;db=d;room=r;
   try{assets=await C.use("assets")}catch(e){assets=null}
+  try{downloadsCap=await C.use("downloads")}catch(e){downloadsCap=null}
   if(user){isOwner=await user.isOwner();try{canWrite=await user.can("data.write")}catch(e){canWrite=null}}
   if(!db){dbReady=true;renderAccount();return}
   if(db){

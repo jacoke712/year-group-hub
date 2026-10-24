@@ -14,6 +14,13 @@ const PRESENCE_TTL = 60 * 1000;
 const MAX_DOC_BYTES = 256 * 1024;
 const MAX_UPLOAD = 4 * 1024 * 1024;
 const IMAGE_TYPES = ["image/png", "image/jpeg", "image/webp", "image/gif", "image/svg+xml"];
+// Files people can send in chats. Served as downloads only, never shown as a web page.
+const FILE_TYPES = [
+  "application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "application/vnd.ms-powerpoint", "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  "application/vnd.ms-excel", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "text/plain", "text/csv", "audio/mpeg", "audio/mp4", "video/mp4",
+];
 const SEG = /^[A-Za-z0-9_\-.~:@+]{1,200}$/;
 
 type Store = ReturnType<typeof getStore>;
@@ -237,12 +244,15 @@ async function rpc(req: Request) {
 
 async function upload(req: Request) {
   const type = (req.headers.get("content-type") || "").split(";")[0].trim().toLowerCase();
-  if (!IMAGE_TYPES.includes(type)) return fail(415, "unsupported_type", "Only pictures (JPG, PNG, GIF, WebP, SVG) can be uploaded.");
+  if (!IMAGE_TYPES.includes(type) && !FILE_TYPES.includes(type)) return fail(415, "unsupported_type", "That kind of file can't be sent here.");
   const buf = await req.arrayBuffer();
   if (!buf.byteLength) return fail(400, "invalid_argument", "That file is empty.");
-  if (buf.byteLength > MAX_UPLOAD) return fail(413, "invalid_argument", "That picture is too big (4 MB max).");
+  if (buf.byteLength > MAX_UPLOAD) return fail(413, "invalid_argument", "That file is too big. Files can be up to 4 MB.");
+  let name = "file";
+  try { name = decodeURIComponent(req.headers.get("x-filename") || "file"); } catch { /* keep default */ }
+  name = name.replace(/[\u0000-\u001f\\/:*?"<>|]+/g, "_").slice(0, 100) || "file";
   const id = hex(crypto.getRandomValues(new Uint8Array(16)).buffer);
-  await store().set("asset/" + id, buf, { metadata: { type } });
+  await store().set("asset/" + id, buf, { metadata: { type, name } });
   return json({ id, url: "/_blob/" + id, sizeBytes: buf.byteLength, contentType: type });
 }
 
@@ -250,11 +260,18 @@ async function serveAsset(id: string) {
   if (!/^[0-9a-f]{32}$/.test(id)) return new Response("Not found", { status: 404 });
   const r = await store().getWithMetadata("asset/" + id, { type: "arrayBuffer" }) as { data: ArrayBuffer; metadata: Record<string, unknown> } | null;
   if (!r) return new Response("Not found", { status: 404 });
-  const type = IMAGE_TYPES.includes(String(r.metadata.type)) ? String(r.metadata.type) : "application/octet-stream";
-  return new Response(r.data, { headers: {
-    "content-type": type, "cache-control": "private, max-age=86400", "x-content-type-options": "nosniff",
+  const stored = String(r.metadata.type);
+  const isImage = IMAGE_TYPES.includes(stored);
+  const type = isImage || FILE_TYPES.includes(stored) ? stored : "application/octet-stream";
+  const headers: Record<string, string> = {
+    "content-type": type, "cache-control": "private, max-age=300", "x-content-type-options": "nosniff",
     "content-security-policy": "default-src 'none'; style-src 'unsafe-inline'; sandbox",
-  } });
+  };
+  if (!isImage) {
+    const name = String(r.metadata.name || "file");
+    headers["content-disposition"] = `attachment; filename="${name.replace(/[^\x20-\x7e]|"/g, "_")}"; filename*=UTF-8''${encodeURIComponent(name)}`;
+  }
+  return new Response(r.data, { headers });
 }
 
 export default async (req: Request, context: { ip?: string }) => {

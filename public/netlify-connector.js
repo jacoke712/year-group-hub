@@ -226,8 +226,9 @@
     name: async function () { return ""; }, avatarUrl: async function () { return null; }, email: async function () { return null; }, search: async function () { return []; }
   };
   var assets = {
-    upload: async function (blob) {
-      return call("/api/upload", { method: "POST", headers: { "content-type": blob.type || "application/octet-stream" }, body: blob });
+    upload: async function (blob, opts) {
+      var name = (opts && opts.name) || blob.name || "file";
+      return call("/api/upload", { method: "POST", headers: { "content-type": blob.type || "application/octet-stream", "x-filename": encodeURIComponent(name) }, body: blob });
     },
     delete: async function (id) { await rpc("deleteAsset", { id: String(id).replace(/^.*\//, "") }); },
     list: async function () { return { assets: [], usage: {} }; }
