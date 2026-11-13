@@ -195,7 +195,7 @@
     } catch (e) { /* try again next tick */ }
     finally { inFlight = false; }
   }
-  function schedule() { clearTimeout(timer); timer = setTimeout(function () { sync().then(schedule); }, document.hidden ? 30000 : 4000); }
+  function schedule() { clearTimeout(timer); timer = setTimeout(function () { sync().then(schedule); }, document.hidden ? 60000 : 5000); }
   function kick() { clearTimeout(timer); sync().then(schedule); }
   ready.then(kick);
   document.addEventListener("visibilitychange", function () { if (!document.hidden) kick(); });

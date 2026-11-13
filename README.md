@@ -11,3 +11,11 @@ The year group site, set up to run on Netlify.
 
 To change the class code: Netlify > this project > Project configuration > Environment variables >
 `CLASS_CODE`, then redeploy. Everyone will need to type the new code.
+
+## Hosting on Cloudflare Pages (free)
+
+The same site also runs on Cloudflare Pages, with its data in a Cloudflare D1 database.
+
+- `functions/[[path]].js` and `cf/server.bundle.js` are the server (built by `./build-cf.sh` from `netlify/functions/api.mts`).
+- `public/_routes.json` makes only `/api/*` and `/_blob/*` run the server, so pages and pictures don't use up the free request allowance.
+- Cloudflare settings: no build command, output folder `public`, a D1 database bound as `DB`, and a variable `CLASS_CODE`.

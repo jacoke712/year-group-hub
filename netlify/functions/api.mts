@@ -33,7 +33,7 @@ function store(): Store {
 }
 function classCode(): string | undefined {
   const n = (globalThis as any).Netlify;
-  return (n && n.env && n.env.get("CLASS_CODE")) || process.env.CLASS_CODE || undefined;
+  return (n && n.env && n.env.get("CLASS_CODE")) || (typeof process !== "undefined" && process.env && process.env.CLASS_CODE) || undefined;
 }
 
 // ---------- helpers ----------
@@ -86,6 +86,19 @@ async function inBatches<T, R>(items: T[], n: number, fn: (x: T) => Promise<R>) 
 }
 
 // ---------- storage ----------
+// Stores may offer faster many-at-once versions (the Cloudflare one does, to stay under its per-request query limit).
+type Fast = { getMany?: (keys: string[]) => Promise<Map<string, string>>; listValues?: (prefix: string) => Promise<{ key: string; value: string }[]>;
+  putMany?: (rows: { key: string; value: string | ArrayBuffer; metadata?: Record<string, unknown> }[]) => Promise<void>; deleteBefore?: (prefix: string, upto: string) => Promise<void> };
+const fast = () => store() as unknown as Fast;
+const b64ToBuf = (b64: string) => { const s = atob(b64); const u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u.buffer; };
+async function readDocs(paths: string[]) {
+  const f = fast();
+  if (f.getMany) {
+    const m = await f.getMany(paths.map(p => "doc/" + p));
+    return paths.map(path => { const v = m.get("doc/" + path); return { path, data: v ? (JSON.parse(v) as { d: unknown }).d : null }; });
+  }
+  return inBatches(paths, 25, async path => ({ path, data: await readDoc(path) }));
+}
 async function readDoc(path: string) {
   const v = await store().get("doc/" + path, { type: "json" }) as { d: unknown } | null;
   return v ? v.d : null;
@@ -97,6 +110,12 @@ async function writeDoc(path: string, data: Record<string, unknown>) {
 }
 async function removeDoc(path: string) { await store().delete("doc/" + path); await recordChange(path); }
 async function listCol(col: string) {
+  const f = fast(), pre = "doc/" + col + "/";
+  if (f.listValues) {
+    const docs: Record<string, unknown> = {};
+    for (const { key, value } of await f.listValues(pre)) if (!key.slice(pre.length).includes("/")) docs[key.slice(pre.length)] = (JSON.parse(value) as { d: unknown }).d;
+    return docs;
+  }
   const { blobs } = await store().list({ prefix: "doc/" + col + "/", directories: true });
   const keys = blobs.map(b => b.key).filter(k => !k.slice(("doc/" + col + "/").length).includes("/"));
   const docs: Record<string, unknown> = {};
@@ -110,21 +129,36 @@ async function ensureSeed() {
   const s = store();
   if (await s.get("meta/seeded")) { seeded = true; return; }
   const data = seed as { docs: Record<string, Record<string, unknown>>; assets: Record<string, { type: string; b64: string }> };
+  const f = fast();
+  if (f.putMany) {
+    await f.putMany([
+      ...Object.entries(data.docs).map(([p, d]) => ({ key: "doc/" + p, value: JSON.stringify({ d, t: Date.now() }) })),
+      ...Object.entries(data.assets).map(([id, a]) => ({ key: "asset/" + id, value: b64ToBuf(a.b64), metadata: { type: a.type } })),
+      { key: "meta/seeded", value: String(Date.now()) },
+    ]);
+    seeded = true; return;
+  }
   await inBatches(Object.entries(data.docs), 10, ([p, d]) => s.setJSON("doc/" + p, { d, t: Date.now() }));
-  await inBatches(Object.entries(data.assets), 10, ([id, a]) => s.set("asset/" + id, Uint8Array.from(Buffer.from(a.b64, "base64")).buffer, { metadata: { type: a.type } }));
+  await inBatches(Object.entries(data.assets), 10, ([id, a]) => s.set("asset/" + id, b64ToBuf(a.b64), { metadata: { type: a.type } }));
   await s.set("meta/seeded", String(Date.now()));
   seeded = true;
 }
 
 async function prune(now: number) {
-  const s = store();
+  const s = store(), f = fast();
+  if (f.deleteBefore) {
+    await f.deleteBefore("chg/", pad(now - CHANGE_TTL));
+    await f.deleteBefore("evt/", pad(now - EVENT_TTL));
+  }
   const drop = async (prefix: string, ttl: number, timeOf: (rest: string) => number) => {
     const { blobs } = await s.list({ prefix });
     const old = blobs.filter(b => now - timeOf(b.key.slice(prefix.length)) > ttl);
     await inBatches(old, 25, b => s.delete(b.key));
   };
-  await drop("chg/", CHANGE_TTL, r => Number(r.slice(0, 13)));
-  await drop("evt/", EVENT_TTL, r => Number(r.slice(0, 13)));
+  if (!f.deleteBefore) {
+    await drop("chg/", CHANGE_TTL, r => Number(r.slice(0, 13)));
+    await drop("evt/", EVENT_TTL, r => Number(r.slice(0, 13)));
+  }
   await drop("pres/", PRESENCE_TTL * 2, r => Number(r.split("~")[1]));
 }
 
@@ -201,7 +235,7 @@ async function rpc(req: Request) {
         const r = key.slice(4), t = Number(r.slice(0, 13)), i = r.indexOf("~", 14), path = r.slice(i + 1);
         if (t >= since && i > 0 && cols.has(parentOf(path))) latest.set(path, Math.max(t, latest.get(path) || 0));
       }
-      const changes = await inBatches([...latest.keys()], 25, async path => ({ path, data: await readDoc(path) }));
+      const changes = await readDocs([...latest.keys()]);
       // presence: keys pres/<peer>~<t>~<uid>
       const byPeer = new Map<string, { peer: string; t: number; uid: string; key: string }>();
       for (const { key } of pres.blobs) {
@@ -222,7 +256,10 @@ async function rpc(req: Request) {
       const peers = [...byPeer.values()].filter(p => now - p.t < PRESENCE_TTL).map(p => ({ peer: p.peer, uid: p.uid === "-" ? null : p.uid, t: p.t }));
       // events
       const evKeys = evt.blobs.map(x => x.key).filter(k => Number(k.slice(4, 17)) >= since);
-      const events = (await inBatches(evKeys, 25, async k => ({ key: k, ...(await s.get(k, { type: "json" }) as object || {}) })));
+      const f = fast();
+      const events = f.getMany
+        ? await (async () => { const m = await f.getMany!(evKeys); return evKeys.filter(k => m.has(k)).map(k => ({ key: k, ...(JSON.parse(m.get(k)!) as object) })); })()
+        : await inBatches(evKeys, 25, async k => ({ key: k, ...(await s.get(k, { type: "json" }) as object || {}) }));
       if (Math.random() < 0.05) await prune(now);
       return json({ now, changes, peers, events });
     }
